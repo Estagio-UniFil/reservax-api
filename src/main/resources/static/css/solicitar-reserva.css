@@ -1,0 +1,269 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #ffffff;
+    color: #111;
+}
+
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 220px;
+    background: #ff6600;
+    color: #fff;
+    padding: 32px 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 70px;
+}
+
+.logo-box {
+    width: 42px;
+    height: 42px;
+    background: #fff;
+    color: #ff6600;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 20px;
+}
+
+.logo-area h2 {
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.menu a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    padding: 12px 16px;
+    border-radius: 8px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.menu a.active {
+    background: #fff;
+    color: #ff6600;
+}
+
+.logout {
+    margin-top: auto;
+    color: #fff;
+    text-decoration: none;
+    font-size: 22px;
+    font-weight: 800;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    padding: 12px 16px;
+}
+
+/* CONTEÚDO */
+.content {
+    flex: 1;
+    background: #fff;
+}
+
+.topbar {
+    height: 98px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+}
+
+.topbar h1,
+.form-card h2 {
+    color: #ff6600;
+    font-size: 30px;
+    font-weight: 800;
+}
+
+.user-area {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.bell {
+    font-size: 26px;
+}
+
+.divider {
+    width: 1px;
+    height: 45px;
+    background: #ddd;
+}
+
+.avatar {
+    width: 44px;
+    height: 44px;
+    background: #ff6600;
+    color: #fff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+}
+
+.user-area strong {
+    font-size: 16px;
+}
+
+.user-area p {
+    margin: 0;
+    font-size: 14px;
+    color: #555;
+}
+
+/* CORPO */
+.page-body {
+    padding: 34px 34px;
+}
+
+.subtitle {
+    margin-bottom: 22px;
+}
+
+.reserva-card {
+    border: 1.5px solid #ff6600;
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin-bottom: 18px;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.20);
+    background: #fff;
+}
+
+.reserva-card h2 {
+    color: #ff6600;
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.form-label {
+    color: #ff6600;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.form-control {
+    border: 1.5px solid #ff6600;
+    border-radius: 8px;
+    font-size: 14px;
+    min-height: 38px;
+}
+
+.form-control:focus {
+    border-color: #ff6600;
+    box-shadow: 0 0 0 0.15rem rgba(255, 102, 0, 0.20);
+}
+
+.info-ambiente {
+    color: #777;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.status-area {
+    display: flex;
+    gap: 28px;
+    align-items: center;
+    color: #555;
+    font-size: 13px;
+    min-height: 54px;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.status-dot.disponivel {
+    background: #28a745;
+}
+
+.status-dot.ocupado {
+    background: #dc3545;
+}
+
+.disponibilidade-texto {
+    text-align: center;
+    color: #aaa;
+    font-size: 14px;
+    margin-top: 12px;
+}
+
+textarea.form-control {
+    min-height: 95px;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.btn-limpar {
+    background: #f3f3f3;
+    color: #333;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-weight: 700;
+}
+
+.btn-solicitar {
+    background: #ff6600;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-weight: 800;
+}
+
+.btn-solicitar:hover {
+    background: #e85c00;
+    color: #fff;
+}
+
+.alert {
+    margin-bottom: 16px;
+    border-radius: 8px;
+}

@@ -1,0 +1,377 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #ffffff;
+    color: #111;
+}
+
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 220px;
+    background: #ff6600;
+    color: #fff;
+    padding: 32px 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 70px;
+}
+
+.logo-box {
+    width: 42px;
+    height: 42px;
+    background: #fff;
+    color: #ff6600;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 20px;
+}
+
+.logo-area h2 {
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.menu a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    padding: 12px 16px;
+    border-radius: 8px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.menu a.active {
+    background: #fff;
+    color: #ff6600;
+}
+
+.logout {
+    margin-top: auto;
+    color: #fff;
+    text-decoration: none;
+    font-size: 22px;
+    font-weight: 800;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    padding: 12px 16px;
+}
+
+/* CONTEÚDO */
+.content {
+    flex: 1;
+    background: #fff;
+}
+
+.topbar {
+    height: 98px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+}
+
+.topbar h1 {
+    color: #ff6600;
+    font-size: 30px;
+    font-weight: 800;
+}
+
+.user-area {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.bell {
+    font-size: 26px;
+}
+
+.divider {
+    width: 1px;
+    height: 45px;
+    background: #ddd;
+}
+
+.avatar {
+    width: 44px;
+    height: 44px;
+    background: #ff6600;
+    color: #fff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+}
+
+.user-area strong {
+    font-size: 16px;
+}
+
+.user-area p {
+    margin: 0;
+    font-size: 14px;
+    color: #555;
+}
+
+/* CORPO */
+.page-body {
+    padding: 28px 34px;
+}
+
+.filter-area {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 34px;
+}
+
+.filter-button,
+.add-button {
+    background: #ff6600;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 00;
+    font-size: 16px;
+    padding: 10px 18px;
+}
+
+.filter-button span {
+    margin-left: 5px;
+}
+
+/* CARDS */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px 48px;
+}
+
+.room-card {
+    border: 1.5px solid #ff6600;
+    border-radius: 8px;
+    padding: 22px 16px 14px;
+    min-height: 120px;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.20);
+}
+
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    min-height: 46px;
+}
+
+.room-icon {
+    width: 38px;
+    height: 38px;
+    background: #ff6600;
+    border-radius: 5px;
+}
+
+.resources {
+    text-align: right;
+    color: #999;
+    font-size: 10px;
+    line-height: 1.2;
+}
+
+.resources p {
+    margin: 0;
+}
+
+.room-card h3 {
+    margin-top: 4px;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.tag {
+    display: inline-block;
+    background: #bfe4ff;
+    color: #3383b8;
+    border-radius: 20px;
+    padding: 3px 20px;
+    font-size: 11px;
+    margin-bottom: 6px;
+}
+
+.capacity {
+    margin: 0;
+    color: #999;
+    font-size: 11px;
+}
+
+/* BOTÃO ADICIONAR */
+.add-area {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 26px;
+}
+
+.add-button {
+    min-width: 200px;
+}
+
+.add-button span {
+    font-size: 26px;
+    margin-right: 18px;
+    vertical-align: middle;
+}
+
+.card-actions {
+    margin-top: 12px;
+}
+
+.btn-editar-sala {
+    background-color: #0d6efd;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-editar-sala:hover {
+    background-color: #0b5ed7;
+}
+
+.btn-salvar-sala {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+    color: white !important;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 8px;
+}
+
+.btn-salvar-sala:hover {
+    background-color: #218838 !important;
+    border-color: #218838 !important;
+}
+
+.card-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+}
+
+.btn-editar-sala {
+    background-color: #0d6efd;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-editar-sala:hover {
+    background-color: #0b5ed7;
+    transform: translateY(-1px);
+}
+
+.btn-excluir-sala {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-excluir-sala:hover {
+    background-color: #bb2d3b;
+    transform: translateY(-1px);
+}
+
+.btn-salvar-sala {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+    color: white !important;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 8px;
+}
+
+.btn-salvar-sala:hover {
+    background-color: #218838 !important;
+    border-color: #218838 !important;
+}
+
+.filtro-salas {
+    position: relative;
+    display: inline-block;
+}
+
+.menu-filtro-salas {
+    display: none;
+    position: absolute;
+    top: 58px;
+    right: 0;
+    width: 210px;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 8px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+}
+
+.menu-filtro-salas.mostrar {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.menu-filtro-salas button {
+    border: none;
+    background: transparent;
+    color: #333;
+    text-align: left;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.menu-filtro-salas button:hover {
+    background-color: #fff3e8;
+    color: #ff5a00;
+}
