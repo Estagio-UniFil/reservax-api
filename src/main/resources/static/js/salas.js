@@ -37,16 +37,16 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
             if (idSalaEmEdicao === null) {
                 await cadastrarSala(ambiente);
-                alert("Sala cadastrada com sucesso!");
+                alert("Ambiente cadastrado com sucesso!");
             } else {
                 await editarSala(idSalaEmEdicao, ambiente);
-                alert("Sala salva com sucesso!");
+                alert("Ambiente salvo com sucesso!");
             }
 
             formNovaSala.reset();
             idSalaEmEdicao = null;
 
-            document.getElementById("modalNovaSalaLabel").innerText = "Cadastrar nova sala";
+            document.getElementById("modalNovaSalaLabel").innerText = "Cadastrar novo ambiente";
             botaoSalvar.innerText = "Salvar";
 
             const modal = bootstrap.Modal.getInstance(document.getElementById("modalNovaSala"));
@@ -56,14 +56,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
         } catch (erro) {
             console.error(erro);
-            alert("Não foi possível salvar a sala.");
+            alert("Não foi possível salvar o ambiente.");
         }
     });
 
     document.getElementById("modalNovaSala").addEventListener("hidden.bs.modal", function () {
         formNovaSala.reset();
         idSalaEmEdicao = null;
-        document.getElementById("modalNovaSalaLabel").innerText = "Cadastrar nova sala";
+        document.getElementById("modalNovaSalaLabel").innerText = "Cadastrar novo ambiente";
         botaoSalvar.innerText = "Salvar";
     });
 });
@@ -112,7 +112,7 @@ async function editarSala(id, ambiente) {
 }
 
 async function excluirSala(id) {
-    const confirmar = confirm("Tem certeza que deseja excluir esta sala?");
+    const confirmar = confirm("Tem certeza que deseja excluir este ambiente?");
 
     if (!confirmar) {
         return;
@@ -127,13 +127,13 @@ async function excluirSala(id) {
             throw new Error("Erro ao excluir ambiente.");
         }
 
-        alert("Sala excluída com sucesso!");
+        alert("Ambiente excluído com sucesso!");
 
         await carregarSalas();
 
     } catch (erro) {
         console.error(erro);
-        alert("Não foi possível excluir a sala.");
+        alert("Não foi possível excluir o ambiente.");
     }
 }
 
@@ -151,7 +151,7 @@ async function carregarSalas() {
 
     } catch (erro) {
         console.error(erro);
-        alert("Não foi possível carregar as salas cadastradas.");
+        alert("Não foi possível carregar os ambientes cadastrados.");
     }
 }
 
@@ -168,7 +168,7 @@ function renderizarSalas() {
     if (ambientesFiltrados.length === 0) {
         cardsGrid.innerHTML = `
             <div class="empty-message">
-                Nenhuma sala encontrada para este filtro.
+                Nenhum ambiente encontrado para este filtro.
             </div>
         `;
         return;
@@ -186,7 +186,7 @@ function filtrarSalas(tipo) {
     const menuFiltro = document.getElementById("menuFiltroSalas");
 
     if (tipo === "TODAS") {
-        botaoFiltro.innerHTML = "Visualizar salas <span>∨</span>";
+        botaoFiltro.innerHTML = "Visualizar ambientes <span>∨</span>";
     } else {
         botaoFiltro.innerHTML = `${formatarTipoAmbiente(tipo)} <span>∨</span>`;
     }
@@ -267,7 +267,7 @@ async function abrirModalEdicao(id) {
         document.getElementById("possuiMicrofone").checked = ambiente.possuiMicrofone;
         document.getElementById("possuiComputadores").checked = ambiente.possuiComputadores;
 
-        document.getElementById("modalNovaSalaLabel").innerText = "Editar sala";
+        document.getElementById("modalNovaSalaLabel").innerText = "Editar ambiente";
         document.querySelector(".btn-salvar-sala").innerText = "Salvar";
 
         const modal = new bootstrap.Modal(document.getElementById("modalNovaSala"));
@@ -275,7 +275,7 @@ async function abrirModalEdicao(id) {
 
     } catch (erro) {
         console.error(erro);
-        alert("Não foi possível carregar os dados da sala.");
+        alert("Não foi possível carregar os dados do ambiente.");
     }
 }
 

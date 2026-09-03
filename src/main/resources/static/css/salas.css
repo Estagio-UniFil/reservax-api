@@ -252,7 +252,7 @@ body {
     margin-top: 12px;
 }
 
-.btn-editar-sala {
+.btn-editar-ambiente {
     background-color: #0d6efd;
     color: white;
     border: none;
@@ -264,11 +264,11 @@ body {
     transition: all 0.2s ease;
 }
 
-.btn-editar-sala:hover {
+.btn-editar-ambiente:hover {
     background-color: #0b5ed7;
 }
 
-.btn-salvar-sala {
+.btn-salvar-ambiente {
     background-color: #28a745 !important;
     border-color: #28a745 !important;
     color: white !important;
@@ -277,7 +277,7 @@ body {
     border-radius: 8px;
 }
 
-.btn-salvar-sala:hover {
+.btn-salvar-ambiente:hover {
     background-color: #218838 !important;
     border-color: #218838 !important;
 }
@@ -288,7 +288,7 @@ body {
     gap: 8px;
 }
 
-.btn-editar-sala {
+.btn-editar-ambiente {
     background-color: #0d6efd;
     color: white;
     border: none;
@@ -300,12 +300,12 @@ body {
     transition: all 0.2s ease;
 }
 
-.btn-editar-sala:hover {
+.btn-editar-ambiente:hover {
     background-color: #0b5ed7;
     transform: translateY(-1px);
 }
 
-.btn-excluir-sala {
+.btn-excluir-ambiente {
     background-color: #dc3545;
     color: white;
     border: none;
@@ -317,12 +317,12 @@ body {
     transition: all 0.2s ease;
 }
 
-.btn-excluir-sala:hover {
+.btn-excluir-ambiente:hover {
     background-color: #bb2d3b;
     transform: translateY(-1px);
 }
 
-.btn-salvar-sala {
+.btn-salvar-ambiente {
     background-color: #28a745 !important;
     border-color: #28a745 !important;
     color: white !important;
@@ -331,17 +331,17 @@ body {
     border-radius: 8px;
 }
 
-.btn-salvar-sala:hover {
+.btn-salvar-ambiente:hover {
     background-color: #218838 !important;
     border-color: #218838 !important;
 }
 
-.filtro-salas {
+.filtro-ambientes {
     position: relative;
     display: inline-block;
 }
 
-.menu-filtro-salas {
+.menu-filtro-ambientes {
     display: none;
     position: absolute;
     top: 58px;
@@ -354,13 +354,13 @@ body {
     z-index: 9999;
 }
 
-.menu-filtro-salas.mostrar {
+.menu-filtro-ambientes.mostrar {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-.menu-filtro-salas button {
+.menu-filtro-ambientes button {
     border: none;
     background: transparent;
     color: #333;
@@ -371,7 +371,7 @@ body {
     cursor: pointer;
 }
 
-.menu-filtro-salas button:hover {
+.menu-filtro-ambientes button:hover {
     background-color: #fff3e8;
     color: #ff5a00;
 }

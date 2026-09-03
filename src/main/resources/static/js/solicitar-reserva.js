@@ -52,7 +52,7 @@ async function carregarAmbientes() {
 }
 
 /*
-    Atualiza as informações da sala selecionada
+    Atualiza as informações do ambiente selecionado
 */
 ambienteSelect.addEventListener("change", () => {
 

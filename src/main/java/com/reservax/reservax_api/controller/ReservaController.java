@@ -22,6 +22,11 @@ public class ReservaController {
         return reservaService.listarTodas();
     }
 
+    @GetMapping("/minhas")
+    public List<Reserva> listarMinhasReservas(@RequestParam String solicitante) {
+        return reservaService.listarReservasDoSolicitante(solicitante);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Reserva> buscarPorId(@PathVariable Long id) {
 
@@ -37,13 +42,30 @@ public class ReservaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Reserva> atualizar(@PathVariable Long id,
-                                              @RequestBody Reserva reserva) {
+    public ResponseEntity<Reserva> atualizar(
+            @PathVariable Long id,
+            @RequestParam String solicitante,
+            @RequestBody Reserva reserva) {
 
         Reserva reservaAtualizada =
-                reservaService.atualizar(id, reserva);
+                reservaService.atualizar(
+                        id,
+                        solicitante,
+                        reserva
+                );
 
         return ResponseEntity.ok(reservaAtualizada);
+    }
+
+    @PatchMapping("/{id}/cancelar")
+    public ResponseEntity<Reserva> cancelar(
+            @PathVariable Long id,
+            @RequestParam String solicitante) {
+
+        Reserva reservaCancelada =
+                reservaService.cancelar(id, solicitante);
+
+        return ResponseEntity.ok(reservaCancelada);
     }
 
     @DeleteMapping("/{id}")

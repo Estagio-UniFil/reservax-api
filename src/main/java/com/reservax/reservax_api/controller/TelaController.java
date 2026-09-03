@@ -16,4 +16,9 @@ public class TelaController {
         return "solicitar-reserva";
     }
 
+    @GetMapping("/minhas-reservas")
+    public String minhasReservas() {
+        return "minhas-reservas";
+    }
+
 }

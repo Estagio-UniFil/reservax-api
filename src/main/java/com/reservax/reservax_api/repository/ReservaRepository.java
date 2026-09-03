@@ -1,5 +1,6 @@
 package com.reservax.reservax_api.repository;
 
+import com.reservax.reservax_api.enums.StatusReserva;
 import com.reservax.reservax_api.model.Reserva;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -9,7 +10,8 @@ import java.time.LocalTime;
 import java.util.List;
 
 @Repository
-public interface ReservaRepository extends JpaRepository<Reserva, Long> {
+public interface ReservaRepository
+        extends JpaRepository<Reserva, Long> {
 
     List<Reserva> findByAmbienteId(Long ambienteId);
 
@@ -22,13 +24,19 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
             LocalDate dataReserva
     );
 
-    /**
-     * Busca reservas do mesmo ambiente e mesma data
-     * para validação de conflito de horário.
-     */
-    List<Reserva> findByAmbienteIdAndDataReservaAndHoraInicioLessThanAndHoraFimGreaterThan(
+    List<Reserva> findByAmbienteIdAndDataReservaAndStatusInAndHoraInicioLessThanAndHoraFimGreaterThan(
             Long ambienteId,
             LocalDate dataReserva,
+            List<StatusReserva> status,
+            LocalTime horaFim,
+            LocalTime horaInicio
+    );
+
+    List<Reserva> findByIdNotAndAmbienteIdAndDataReservaAndStatusInAndHoraInicioLessThanAndHoraFimGreaterThan(
+            Long reservaId,
+            Long ambienteId,
+            LocalDate dataReserva,
+            List<StatusReserva> status,
             LocalTime horaFim,
             LocalTime horaInicio
     );
