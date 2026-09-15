@@ -12,6 +12,7 @@ let ambientes = [];
     Carrega os ambientes ao abrir a página
 */
 document.addEventListener("DOMContentLoaded", () => {
+    carregarSolicitante();
     carregarAmbientes();
 });
 
@@ -108,10 +109,6 @@ formReserva.addEventListener("submit", async (event) => {
             )
         },
 
-        solicitante: document
-            .getElementById("solicitanteReserva")
-            .value,
-
         dataReserva: document
             .getElementById("dataReserva")
             .value,
@@ -131,7 +128,7 @@ formReserva.addEventListener("submit", async (event) => {
 
     try {
 
-        const response = await fetch(API_RESERVAS, {
+        const response = await fetchComCsrf(API_RESERVAS, {
 
             method: "POST",
 
@@ -189,4 +186,17 @@ function exibirMensagem(texto, tipo) {
         mensagemReserva.innerHTML = "";
 
     }, 5000);
+}
+
+async function carregarSolicitante() {
+    try {
+        const resposta = await fetch("/auth/me");
+        const usuario = await resposta.json();
+
+        if (resposta.ok) {
+            document.getElementById("solicitanteReserva").value = usuario.nome;
+        }
+    } catch (erro) {
+        console.error(erro);
+    }
 }

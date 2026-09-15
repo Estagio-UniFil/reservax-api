@@ -160,7 +160,7 @@ body {
     color: #fff;
     border: none;
     border-radius: 8px;
-    font-weight: 00;
+    font-weight: 700;
     font-size: 16px;
     padding: 10px 18px;
 }
@@ -238,6 +238,10 @@ body {
     margin-top: 26px;
 }
 
+body:not(.perfil-admin) .add-area {
+    display: none;
+}
+
 .add-button {
     min-width: 200px;
 }
@@ -250,76 +254,35 @@ body {
 
 .card-actions {
     margin-top: 12px;
-}
-
-.btn-editar-ambiente {
-    background-color: #0d6efd;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btn-editar-ambiente:hover {
-    background-color: #0b5ed7;
-}
-
-.btn-salvar-ambiente {
-    background-color: #28a745 !important;
-    border-color: #28a745 !important;
-    color: white !important;
-    font-weight: 600;
-    padding: 10px 20px;
-    border-radius: 8px;
-}
-
-.btn-salvar-ambiente:hover {
-    background-color: #218838 !important;
-    border-color: #218838 !important;
-}
-
-.card-actions {
-    margin-top: 12px;
     display: flex;
     gap: 8px;
 }
 
-.btn-editar-ambiente {
+.btn-editar-sala,
+.btn-excluir-sala {
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-editar-sala {
     background-color: #0d6efd;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
 }
 
-.btn-editar-ambiente:hover {
+.btn-editar-sala:hover {
     background-color: #0b5ed7;
-    transform: translateY(-1px);
 }
 
-.btn-excluir-ambiente {
+.btn-excluir-sala {
     background-color: #dc3545;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
 }
 
-.btn-excluir-ambiente:hover {
+.btn-excluir-sala:hover {
     background-color: #bb2d3b;
-    transform: translateY(-1px);
 }
 
 .btn-salvar-ambiente {
@@ -336,31 +299,33 @@ body {
     border-color: #218838 !important;
 }
 
-.filtro-ambientes {
+.filtro-salas {
     position: relative;
     display: inline-block;
 }
 
-.menu-filtro-ambientes {
+.menu-filtro-salas {
     display: none;
     position: absolute;
-    top: 58px;
+    top: calc(100% + 8px);
     right: 0;
-    width: 210px;
+    width: 230px;
     background: #ffffff;
+    border: 1px solid #eeeeee;
     border-radius: 12px;
     padding: 8px;
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
     z-index: 9999;
 }
 
-.menu-filtro-ambientes.mostrar {
+.menu-filtro-salas.mostrar {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-.menu-filtro-ambientes button {
+.menu-filtro-salas button {
+    width: 100%;
     border: none;
     background: transparent;
     color: #333;
@@ -371,7 +336,8 @@ body {
     cursor: pointer;
 }
 
-.menu-filtro-ambientes button:hover {
+.menu-filtro-salas button:hover,
+.menu-filtro-salas button.ativo {
     background-color: #fff3e8;
     color: #ff5a00;
 }

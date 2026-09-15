@@ -2,45 +2,91 @@ package com.reservax.reservax_api.service;
 
 import com.reservax.reservax_api.model.Ambiente;
 import com.reservax.reservax_api.model.Reserva;
+import com.reservax.reservax_api.model.Usuario;
 import com.reservax.reservax_api.repository.AmbienteRepository;
 import com.reservax.reservax_api.repository.ReservaRepository;
+import com.reservax.reservax_api.repository.UsuarioRepository;
 import com.reservax.reservax_api.enums.StatusReserva;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class ReservaService {
 
     private final ReservaRepository reservaRepository;
     private final AmbienteRepository ambienteRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final NotificacaoService notificacaoService;
 
-    public ReservaService(ReservaRepository reservaRepository,
-                           AmbienteRepository ambienteRepository) {
+    public ReservaService(
+            ReservaRepository reservaRepository,
+            AmbienteRepository ambienteRepository,
+            UsuarioRepository usuarioRepository,
+            NotificacaoService notificacaoService) {
 
         this.reservaRepository = reservaRepository;
         this.ambienteRepository = ambienteRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.notificacaoService = notificacaoService;
     }
 
     public List<Reserva> listarTodas() {
-        return reservaRepository.findAll();
+        expirarReservasPendentesEncerradas(LocalDateTime.now());
+        return reservaRepository.findAllByDataExclusaoIsNull();
     }
 
-    public List<Reserva> listarReservasDoSolicitante(String solicitante) {
-        return reservaRepository.findBySolicitante(solicitante);
+    public List<Reserva> listarReservasDoSolicitante(
+            String emailUsuario,
+            boolean antigas) {
 
+        Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
+        LocalDateTime agora = LocalDateTime.now();
+        LocalDate dataAtual = agora.toLocalDate();
+        LocalTime horaAtual = agora.toLocalTime();
+
+        expirarReservasPendentesEncerradas(agora);
+
+        List<Reserva> reservas = antigas
+                ? reservaRepository.findReservasAntigasDoSolicitante(
+                        usuario.getId(),
+                        usuario.getNome(),
+                        dataAtual,
+                        horaAtual
+                )
+                : reservaRepository.findReservasAtuaisOuFuturasDoSolicitante(
+                        usuario.getId(),
+                        usuario.getNome(),
+                        dataAtual,
+                        horaAtual
+                );
+
+        reservas.forEach(reserva ->
+                reserva.setReaberturaDisponivel(
+                        podeReabrir(reserva, agora)
+                )
+        );
+
+        return reservas;
     }
 
     public Optional<Reserva> buscarPorId(Long id) {
-        return reservaRepository.findById(id);
+        expirarReservasPendentesEncerradas(LocalDateTime.now());
+        return reservaRepository.findByIdAndDataExclusaoIsNull(id);
     }
 
-    public Reserva salvar(Reserva reserva) {
+    public Reserva salvar(Reserva reserva, String emailUsuario) {
+
+        Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
 
         // Verifica se o ambiente existe
-        Ambiente ambiente = ambienteRepository.findById(
+        Ambiente ambiente = ambienteRepository.findByIdAndDataExclusaoIsNull(
                 reserva.getAmbiente().getId()
         ).orElseThrow(() ->
                 new RuntimeException("Ambiente não encontrado.")
@@ -61,9 +107,20 @@ public class ReservaService {
             );
         }
 
+        LocalDateTime inicioReserva = LocalDateTime.of(
+                reserva.getDataReserva(),
+                reserva.getHoraInicio()
+        );
+
+        if (!inicioReserva.isAfter(LocalDateTime.now())) {
+            throw new RuntimeException(
+                    "A reserva deve possuir uma data e horário futuros."
+            );
+        }
+
         // Verifica conflito de horário
         boolean possuiConflito = !reservaRepository
-            .findByAmbienteIdAndDataReservaAndStatusInAndHoraInicioLessThanAndHoraFimGreaterThan(
+            .findByDataExclusaoIsNullAndAmbienteIdAndDataReservaAndStatusInAndHoraInicioLessThanAndHoraFimGreaterThan(
                     ambiente.getId(),
                     reserva.getDataReserva(),
                     List.of(
@@ -83,21 +140,35 @@ public class ReservaService {
         }
 
         reserva.setAmbiente(ambiente);
+        reserva.setUsuario(usuario);
+        reserva.setSolicitante(usuario.getNome());
+        reserva.setStatus(StatusReserva.PENDENTE);
+        reserva.setDataExclusao(null);
 
-        return reservaRepository.save(reserva);
+        Reserva reservaSalva = reservaRepository.save(reserva);
+
+        notificacaoService.notificarAdministradores(
+                usuario.getNome() + " criou uma nova solicitação de reserva.",
+                "/gerenciar-solicitacoes?reservaId=" + reservaSalva.getId()
+        );
+
+        return reservaSalva;
     }
 
     public Reserva atualizar(
             Long id,
-            String solicitante,
+            String emailUsuario,
             Reserva reservaAtualizada) {
 
-        Reserva reserva = reservaRepository.findById(id)
+        expirarReservasPendentesEncerradas(LocalDateTime.now());
+        Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
+
+        Reserva reserva = reservaRepository.findByIdAndDataExclusaoIsNull(id)
                 .orElseThrow(() ->
                         new RuntimeException("Reserva não encontrada.")
                 );
 
-        if (!reserva.getSolicitante().equalsIgnoreCase(solicitante)) {
+        if (!pertenceAoUsuario(reserva, usuario)) {
             throw new RuntimeException(
                     "Você não pode editar a reserva de outro usuário."
             );
@@ -105,14 +176,15 @@ public class ReservaService {
 
         if (
                 reserva.getStatus() == StatusReserva.CANCELADA ||
-                reserva.getStatus() == StatusReserva.REJEITADA
+                reserva.getStatus() == StatusReserva.REJEITADA ||
+                reserva.getStatus() == StatusReserva.EXPIRADA
         ) {
             throw new RuntimeException(
                     "Esta reserva não pode ser editada."
             );
         }
 
-        Ambiente ambiente = ambienteRepository.findById(
+        Ambiente ambiente = ambienteRepository.findByIdAndDataExclusaoIsNull(
                 reservaAtualizada.getAmbiente().getId()
         ).orElseThrow(() ->
                 new RuntimeException("Ambiente não encontrado.")
@@ -144,7 +216,7 @@ public class ReservaService {
         }
 
         boolean possuiConflito = !reservaRepository
-                .findByIdNotAndAmbienteIdAndDataReservaAndStatusInAndHoraInicioLessThanAndHoraFimGreaterThan(
+                .findByDataExclusaoIsNullAndIdNotAndAmbienteIdAndDataReservaAndStatusInAndHoraInicioLessThanAndHoraFimGreaterThan(
                         id,
                         ambiente.getId(),
                         reservaAtualizada.getDataReserva(),
@@ -168,19 +240,30 @@ public class ReservaService {
         reserva.setHoraInicio(reservaAtualizada.getHoraInicio());
         reserva.setHoraFim(reservaAtualizada.getHoraFim());
         reserva.setObservacao(reservaAtualizada.getObservacao());
-
+        reserva.setUsuario(usuario);
+        reserva.setSolicitante(usuario.getNome());
         reserva.setStatus(StatusReserva.PENDENTE);
 
-        return reservaRepository.save(reserva);
+        Reserva reservaSalva = reservaRepository.save(reserva);
+
+        notificacaoService.notificarAdministradores(
+                usuario.getNome() + " alterou uma solicitação de reserva.",
+                "/gerenciar-solicitacoes?reservaId=" + reservaSalva.getId()
+        );
+
+        return reservaSalva;
     }
 
-    public Reserva cancelar(Long id, String solicitante) {
-        Reserva reserva = reservaRepository.findById(id)
+    public Reserva cancelar(Long id, String emailUsuario) {
+        expirarReservasPendentesEncerradas(LocalDateTime.now());
+        Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
+
+        Reserva reserva = reservaRepository.findByIdAndDataExclusaoIsNull(id)
                 .orElseThrow(() ->
                         new RuntimeException("Reserva não encontrada.")
                 );
 
-        if (!reserva.getSolicitante().equalsIgnoreCase(solicitante)) {
+        if (!pertenceAoUsuario(reserva, usuario)) {
             throw new RuntimeException(
                     "Você não pode cancelar a reserva de outro usuário."
             );
@@ -198,6 +281,12 @@ public class ReservaService {
             );
         }
 
+        if (reserva.getStatus() == StatusReserva.EXPIRADA) {
+            throw new RuntimeException(
+                    "Uma reserva expirada não pode ser cancelada."
+            );
+        }
+
         LocalDateTime inicioReserva = LocalDateTime.of(
                 reserva.getDataReserva(),
                 reserva.getHoraInicio()
@@ -211,16 +300,218 @@ public class ReservaService {
 
         reserva.setStatus(StatusReserva.CANCELADA);
 
-        return reservaRepository.save(reserva);
+        Reserva reservaSalva = reservaRepository.save(reserva);
+
+        notificacaoService.notificarAdministradores(
+                usuario.getNome() + " cancelou uma reserva.",
+                "/gerenciar-solicitacoes?reservaId=" + reservaSalva.getId()
+        );
+
+        return reservaSalva;
+    }
+
+    public Reserva reabrir(Long id, String emailUsuario) {
+        Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
+
+        Reserva reserva = reservaRepository.findByIdAndDataExclusaoIsNull(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Reserva não encontrada.")
+                );
+
+        if (!pertenceAoUsuario(reserva, usuario)) {
+            throw new RuntimeException(
+                    "Você não pode reabrir a reserva de outro usuário."
+            );
+        }
+
+        if (reserva.getStatus() != StatusReserva.CANCELADA) {
+            throw new RuntimeException(
+                    "Somente uma reserva cancelada pode ser reaberta."
+            );
+        }
+
+        LocalDateTime agora = LocalDateTime.now();
+        LocalDateTime inicioReserva = LocalDateTime.of(
+                reserva.getDataReserva(),
+                reserva.getHoraInicio()
+        );
+
+        if (!inicioReserva.isAfter(agora)) {
+            throw new RuntimeException(
+                    "Uma reserva com data ou horário já passado não pode ser reaberta."
+            );
+        }
+
+        if (!reserva.getAmbiente().getAtivo()) {
+            throw new RuntimeException(
+                    "Não é possível reabrir uma reserva para um ambiente inativo."
+            );
+        }
+
+        if (possuiConflito(reserva)) {
+            throw new RuntimeException(
+                    "A reserva não pode ser reaberta porque o ambiente já está ocupado neste horário."
+            );
+        }
+
+        reserva.setStatus(StatusReserva.PENDENTE);
+        reserva.setUsuario(usuario);
+        reserva.setSolicitante(usuario.getNome());
+        reserva.setReaberturaDisponivel(false);
+
+        Reserva reservaSalva = reservaRepository.save(reserva);
+
+        notificacaoService.notificarAdministradores(
+                usuario.getNome() + " reabriu uma solicitação de reserva.",
+                "/gerenciar-solicitacoes?reservaId=" + reservaSalva.getId()
+        );
+
+        return reservaSalva;
+    }
+
+    public Reserva aprovar(Long id) {
+        expirarReservasPendentesEncerradas(LocalDateTime.now());
+        Reserva reserva = buscarReservaPendente(id);
+
+        if (!reserva.getAmbiente().getAtivo() ||
+                reserva.getAmbiente().getDataExclusao() != null) {
+            throw new RuntimeException(
+                    "A reserva não pode ser aprovada porque o ambiente foi excluído."
+            );
+        }
+
+        if (possuiConflito(reserva)) {
+            throw new RuntimeException(
+                    "A reserva não pode ser aprovada porque existe conflito de horário."
+            );
+        }
+
+        reserva.setStatus(StatusReserva.APROVADA);
+        Reserva reservaSalva = reservaRepository.save(reserva);
+
+        notificacaoService.notificarUsuario(
+                obterUsuarioDaReserva(reservaSalva),
+                "Sua reserva para " + reservaSalva.getAmbiente().getNome() +
+                        " foi aprovada.",
+                "/minhas-reservas?reservaId=" + reservaSalva.getId()
+        );
+
+        return reservaSalva;
+    }
+
+    public Reserva rejeitar(Long id) {
+        expirarReservasPendentesEncerradas(LocalDateTime.now());
+        Reserva reserva = buscarReservaPendente(id);
+        reserva.setStatus(StatusReserva.REJEITADA);
+
+        Reserva reservaSalva = reservaRepository.save(reserva);
+
+        notificacaoService.notificarUsuario(
+                obterUsuarioDaReserva(reservaSalva),
+                "Sua reserva para " + reservaSalva.getAmbiente().getNome() +
+                        " foi rejeitada.",
+                "/minhas-reservas?reservaId=" + reservaSalva.getId()
+        );
+
+        return reservaSalva;
+    }
+
+    private boolean podeReabrir(
+            Reserva reserva,
+            LocalDateTime agora) {
+
+        if (reserva.getStatus() != StatusReserva.CANCELADA) {
+            return false;
+        }
+
+        LocalDateTime inicioReserva = LocalDateTime.of(
+                reserva.getDataReserva(),
+                reserva.getHoraInicio()
+        );
+
+        return inicioReserva.isAfter(agora)
+                && reserva.getAmbiente().getAtivo()
+                && !possuiConflito(reserva);
+    }
+
+    private boolean possuiConflito(Reserva reserva) {
+        return !reservaRepository
+                .findByDataExclusaoIsNullAndIdNotAndAmbienteIdAndDataReservaAndStatusInAndHoraInicioLessThanAndHoraFimGreaterThan(
+                        reserva.getId(),
+                        reserva.getAmbiente().getId(),
+                        reserva.getDataReserva(),
+                        List.of(
+                                StatusReserva.PENDENTE,
+                                StatusReserva.APROVADA
+                        ),
+                        reserva.getHoraFim(),
+                        reserva.getHoraInicio()
+                )
+                .isEmpty();
+    }
+
+    private void expirarReservasPendentesEncerradas(
+            LocalDateTime agora) {
+
+        reservaRepository.expirarReservasPendentesEncerradas(
+                StatusReserva.PENDENTE,
+                StatusReserva.EXPIRADA,
+                agora.toLocalDate(),
+                agora.toLocalTime()
+        );
+    }
+
+    private Usuario buscarUsuarioPorEmail(String email) {
+        return usuarioRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() ->
+                        new RuntimeException("Usuário autenticado não encontrado.")
+                );
+    }
+
+    private boolean pertenceAoUsuario(
+            Reserva reserva,
+            Usuario usuario) {
+
+        if (reserva.getUsuario() != null) {
+            return reserva.getUsuario().getId().equals(usuario.getId());
+        }
+
+        return reserva.getSolicitante()
+                .equalsIgnoreCase(usuario.getNome());
+    }
+
+    private Reserva buscarReservaPendente(Long id) {
+        Reserva reserva = reservaRepository.findByIdAndDataExclusaoIsNull(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Reserva não encontrada.")
+                );
+
+        if (reserva.getStatus() != StatusReserva.PENDENTE) {
+            throw new RuntimeException(
+                    "Somente uma solicitação pendente pode ser analisada."
+            );
+        }
+
+        return reserva;
+    }
+
+    private Usuario obterUsuarioDaReserva(Reserva reserva) {
+        if (reserva.getUsuario() != null) {
+            return reserva.getUsuario();
+        }
+
+        return usuarioRepository
+                .findFirstByNomeIgnoreCase(reserva.getSolicitante())
+                .orElse(null);
     }
 
     public void excluir(Long id) {
+        Reserva reserva = reservaRepository.findByIdAndDataExclusaoIsNull(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Reserva não encontrada.")
+                );
 
-        if (!reservaRepository.existsById(id)) {
-
-            throw new RuntimeException("Reserva não encontrada.");
-        }
-
-        reservaRepository.deleteById(id);
+        reserva.setDataExclusao(LocalDateTime.now());
+        reservaRepository.save(reserva);
     }
 }

@@ -1,5 +1,3 @@
-const solicitanteAtual = "Tiago Galvão";
-
 const listaMinhasReservas =
     document.getElementById("listaMinhasReservas");
 
@@ -9,10 +7,21 @@ const mensagemReservas =
 const formEditarReserva =
     document.getElementById("formEditarReserva");
 
+const filtroPeriodo =
+    document.getElementById("filtroPeriodo");
+
+const descricaoFiltro =
+    document.getElementById("descricaoFiltro");
+
 let reservasAtuais = [];
 let ambientesAtivos = [];
 
 document.addEventListener("DOMContentLoaded", function () {
+    filtroPeriodo.addEventListener("change", function () {
+        atualizarDescricaoFiltro();
+        carregarMinhasReservas();
+    });
+
     carregarDadosIniciais();
 });
 
@@ -25,7 +34,8 @@ async function carregarDadosIniciais() {
 
 async function carregarMinhasReservas() {
     try {
-        const url = `/reservas/minhas?solicitante=${encodeURIComponent(solicitanteAtual)}`;
+        const antigas = filtroPeriodo.value === "antigas";
+        const url = `/reservas/minhas?antigas=${antigas}`;
 
         const resposta = await fetch(url);
 
@@ -34,7 +44,7 @@ async function carregarMinhasReservas() {
         }
 
         reservasAtuais = await resposta.json();
-        renderizarReservas(reservasAtuais);
+        renderizarReservas(reservasAtuais, antigas);
     } catch (erro) {
         console.error(erro);
 
@@ -42,14 +52,16 @@ async function carregarMinhasReservas() {
     }
 }
 
-function renderizarReservas(reservas) {
+function renderizarReservas(reservas, antigas) {
     listaMinhasReservas.innerHTML = "";
 
     if (reservas.length === 0) {
         listaMinhasReservas.innerHTML = `
             <tr>
                 <td colspan="5">
-                    Nenhuma reserva encontrada.
+                    ${antigas
+                        ? "Nenhuma reserva antiga encontrada."
+                        : "Nenhuma reserva atual ou futura encontrada."}
                 </td>
             </tr>
         `;
@@ -59,9 +71,16 @@ function renderizarReservas(reservas) {
 
     reservas.forEach(function (reserva) {
         const linha = document.createElement("tr");
+        const reservaDestacada = Number(
+            new URLSearchParams(window.location.search).get("reservaId")
+        );
+
+        if (reserva.id === reservaDestacada) {
+            linha.classList.add("linha-reserva-destacada");
+        }
 
         linha.innerHTML = `
-            <td>${reserva.ambiente.nome}</td>
+            <td>${escaparHtmlReserva(reserva.ambiente.nome)}</td>
             <td>${formatarData(reserva.dataReserva)}</td>
             <td>
                 ${reserva.horaInicio.substring(0, 5)}
@@ -80,6 +99,11 @@ function renderizarReservas(reservas) {
 
         listaMinhasReservas.appendChild(linha);
     });
+
+    const linhaDestacada = document.querySelector(
+        ".linha-reserva-destacada"
+    );
+    linhaDestacada?.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 function criarAcoesReserva(reserva) {
@@ -89,9 +113,26 @@ function criarAcoesReserva(reserva) {
 
     const reservaJaPassou = inicioReserva.getTime() <= Date.now();
 
+    if (reserva.status === "CANCELADA") {
+        if (reserva.reaberturaDisponivel && !reservaJaPassou) {
+            return `
+                <div class="botoes-acoes">
+                    <button
+                        type="button"
+                        class="btn-reabrir"
+                        onclick="reabrirReserva(${reserva.id})">
+                        Reabrir
+                    </button>
+                </div>
+            `;
+        }
+
+        return "-";
+    }
+
     if (
-        reserva.status === "CANCELADA" ||
         reserva.status === "REJEITADA" ||
+        reserva.status === "EXPIRADA" ||
         reservaJaPassou
     ) {
         return "-";
@@ -188,10 +229,9 @@ formEditarReserva.addEventListener("submit", async function (event) {
     };
 
     try {
-        const url =
-            `/reservas/${id}?solicitante=${encodeURIComponent(solicitanteAtual)}`;
+        const url = `/reservas/${id}`;
 
-        const resposta = await fetch(url, {
+        const resposta = await fetchComCsrf(url, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"
@@ -226,10 +266,9 @@ async function cancelarReserva(id) {
     }
 
     try {
-        const url =
-            `/reservas/${id}/cancelar?solicitante=${encodeURIComponent(solicitanteAtual)}`;
+        const url = `/reservas/${id}/cancelar`;
 
-        const resposta = await fetch(url, {
+        const resposta = await fetchComCsrf(url, {
             method: "PATCH"
         });
 
@@ -246,6 +285,46 @@ async function cancelarReserva(id) {
 
         exibirMensagem(erro.message, "danger");
     }
+}
+
+async function reabrirReserva(id) {
+    const confirmou = confirm(
+        "Deseja reabrir esta solicitação de reserva?"
+    );
+
+    if (!confirmou) {
+        return;
+    }
+
+    try {
+        const url = `/reservas/${id}/reabrir`;
+
+        const resposta = await fetchComCsrf(url, {
+            method: "PATCH"
+        });
+
+        if (!resposta.ok) {
+            throw new Error(await obterMensagemErro(resposta));
+        }
+
+        exibirMensagem(
+            "Solicitação reaberta com sucesso e enviada para análise!",
+            "success"
+        );
+
+        await carregarMinhasReservas();
+    } catch (erro) {
+        console.error(erro);
+        exibirMensagem(erro.message, "danger");
+
+        await carregarMinhasReservas();
+    }
+}
+
+function atualizarDescricaoFiltro() {
+    descricaoFiltro.innerText = filtroPeriodo.value === "antigas"
+        ? "Reservas cujo horário de término já passou."
+        : "Reservas em andamento ou que ainda vão acontecer.";
 }
 
 async function obterMensagemErro(resposta) {
@@ -276,8 +355,15 @@ function formatarStatus(status) {
         PENDENTE: "Pendente",
         APROVADA: "Aprovada",
         REJEITADA: "Rejeitada",
-        CANCELADA: "Cancelada"
+        CANCELADA: "Cancelada",
+        EXPIRADA: "Expirada"
     };
 
     return nomes[status] || status;
+}
+
+function escaparHtmlReserva(valor) {
+    const elemento = document.createElement("div");
+    elemento.innerText = valor || "-";
+    return elemento.innerHTML;
 }

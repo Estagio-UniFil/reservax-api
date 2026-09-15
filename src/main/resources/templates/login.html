@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReservaX - Login</title>
+    <link rel="stylesheet" href="/css/login.css?v=2">
+</head>
+<body>
+
+<main class="pagina-login">
+    <section class="painel-login">
+        <div class="formulario-area">
+            <div class="login-conteudo">
+                <h1>ReservaX</h1>
+                <p class="subtitulo">Sistema de Reserva de Ambientes Acadêmicos</p>
+
+                <div class="mensagem erro" th:if="${param.erro}">
+                    E-mail ou senha inválidos.
+                </div>
+                <div class="mensagem sucesso" th:if="${param.logout}">
+                    Sessão encerrada com sucesso.
+                </div>
+                <div class="mensagem sucesso" th:if="${param.cadastrado}">
+                    Conta administrativa criada. Faça o login.
+                </div>
+                <div class="mensagem sucesso" th:if="${param.contaExcluida}">
+                    Sua conta foi excluída e a sessão foi encerrada.
+                </div>
+                <div class="mensagem erro" th:if="${param.cadastroAdminIndisponivel}">
+                    O administrador inicial já foi cadastrado.
+                </div>
+
+                <form th:action="@{/login}" method="post">
+                    <label class="campo-login">
+                        <span>✉</span>
+                        <input type="email" name="email" placeholder="E-mail" required autofocus>
+                    </label>
+
+                    <label class="campo-login">
+                        <span>▣</span>
+                        <input type="password" name="senha" placeholder="Senha" required>
+                    </label>
+
+                    <label class="manter-conectado">
+                        <input type="checkbox" name="remember-me">
+                        <span>Manter-me conectado</span>
+                    </label>
+
+                    <button class="botao-principal" type="submit">Entrar</button>
+                </form>
+
+                <p class="criar-conta" th:if="${cadastroAdminDisponivel}">
+                    Primeiro acesso administrativo?
+                    <a href="/cadastro-admin">Criar conta de administrador</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="marca-area" aria-hidden="true">
+            <div class="marca-repetida">
+                <span>RESERVAX</span><span>RESERVAX</span><span>RESERVAX</span>
+                <span>RESERVAX</span><span>RESERVAX</span><span>RESERVAX</span>
+                <span>RESERVAX</span><span>RESERVAX</span><span>RESERVAX</span>
+            </div>
+        </div>
+    </section>
+</main>
+
+</body>
+</html>

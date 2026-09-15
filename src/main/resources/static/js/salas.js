@@ -1,20 +1,23 @@
 let idSalaEmEdicao = null;
 let listaAmbientes = [];
 let filtroAtual = "TODAS";
+let usuarioAdmin = false;
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
     const botaoSalvar = document.querySelector(".btn-salvar-sala");
     const formNovaSala = document.getElementById("formNovaSala");
 
     const botaoFiltroSalas = document.getElementById("botaoFiltroSalas");
     const menuFiltroSalas = document.getElementById("menuFiltroSalas");
 
+    await carregarPerfilUsuario();
     carregarSalas();
 
     if (botaoFiltroSalas && menuFiltroSalas) {
         botaoFiltroSalas.addEventListener("click", function (event) {
             event.stopPropagation();
-            menuFiltroSalas.classList.toggle("mostrar");
+            const menuAberto = menuFiltroSalas.classList.toggle("mostrar");
+            botaoFiltroSalas.setAttribute("aria-expanded", menuAberto);
         });
 
         menuFiltroSalas.addEventListener("click", function (event) {
@@ -23,6 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         document.addEventListener("click", function () {
             menuFiltroSalas.classList.remove("mostrar");
+            botaoFiltroSalas.setAttribute("aria-expanded", "false");
         });
     }
 
@@ -84,7 +88,7 @@ function montarObjetoAmbiente() {
 }
 
 async function cadastrarSala(ambiente) {
-    const resposta = await fetch("/ambientes", {
+    const resposta = await fetchComCsrf("/ambientes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(ambiente)
@@ -98,7 +102,7 @@ async function cadastrarSala(ambiente) {
 }
 
 async function editarSala(id, ambiente) {
-    const resposta = await fetch(`/ambientes/${id}`, {
+    const resposta = await fetchComCsrf(`/ambientes/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(ambiente)
@@ -119,7 +123,7 @@ async function excluirSala(id) {
     }
 
     try {
-        const resposta = await fetch(`/ambientes/${id}`, {
+        const resposta = await fetchComCsrf(`/ambientes/${id}`, {
             method: "DELETE"
         });
 
@@ -195,6 +199,29 @@ function filtrarSalas(tipo) {
         menuFiltro.classList.remove("mostrar");
     }
 
+    document.getElementById("botaoFiltroSalas")
+        .setAttribute("aria-expanded", "false");
+
+    document.querySelectorAll("#menuFiltroSalas button")
+        .forEach(botao => botao.classList.remove("ativo"));
+
+    const opcoesFiltro = {
+        TODAS: 0,
+        SALA_AULA: 1,
+        LABORATORIO: 2,
+        AUDITORIO: 3,
+        SALA_REUNIAO: 4,
+        BIBLIOTECA: 5
+    };
+
+    const botaoSelecionado = document.querySelectorAll(
+        "#menuFiltroSalas button"
+    )[opcoesFiltro[tipo]];
+
+    if (botaoSelecionado) {
+        botaoSelecionado.classList.add("ativo");
+    }
+
     renderizarSalas();
 }
 
@@ -230,15 +257,17 @@ function adicionarCardNaTela(ambiente) {
 
         <p class="capacity">👥 Capacidade: ${ambiente.capacidade} pessoas</p>
 
-        <div class="card-actions">
-            <button class="btn-editar-sala" onclick="abrirModalEdicao(${ambiente.id})">
-                Editar
-            </button>
+        ${usuarioAdmin ? `
+            <div class="card-actions">
+                <button class="btn-editar-sala" onclick="abrirModalEdicao(${ambiente.id})">
+                    Editar
+                </button>
 
-            <button class="btn-excluir-sala" onclick="excluirSala(${ambiente.id})">
-                Excluir
-            </button>
-        </div>
+                <button class="btn-excluir-sala" onclick="excluirSala(${ambiente.id})">
+                    Excluir
+                </button>
+            </div>
+        ` : ""}
     `;
 
     cardsGrid.appendChild(card);
@@ -289,4 +318,19 @@ function formatarTipoAmbiente(tipo) {
     };
 
     return tipos[tipo] || tipo;
+}
+
+async function carregarPerfilUsuario() {
+    try {
+        const resposta = await fetch("/auth/me");
+        const usuario = await resposta.json();
+        usuarioAdmin = resposta.ok && usuario.tipoUsuario === "ADMIN";
+
+        const areaAdicionar = document.querySelector(".add-area");
+        if (areaAdicionar) {
+            areaAdicionar.hidden = !usuarioAdmin;
+        }
+    } catch (erro) {
+        usuarioAdmin = false;
+    }
 }

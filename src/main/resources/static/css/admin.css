@@ -1,0 +1,159 @@
+.admin-card {
+    min-height: 430px;
+    overflow: hidden;
+    border: 1px solid #ff6600;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 7px 16px rgba(0, 0, 0, 0.12);
+}
+
+.tabela-admin {
+    min-width: 760px;
+}
+
+.tabela-admin th {
+    padding-top: 24px;
+    color: #ff6600;
+    text-align: center;
+    font-size: 15px;
+}
+
+.tabela-admin td {
+    text-align: center;
+}
+
+.acoes-solicitacao,
+.acoes-usuario {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-aprovar,
+.btn-rejeitar,
+.btn-editar-usuario,
+.btn-desativar-usuario,
+.botao-laranja {
+    border: 0;
+    border-radius: 7px;
+    padding: 8px 14px;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-aprovar {
+    background: #198754;
+}
+
+.btn-aprovar:hover {
+    background: #157347;
+}
+
+.btn-rejeitar,
+.btn-desativar-usuario {
+    background: #dc3545;
+}
+
+.btn-rejeitar:hover,
+.btn-desativar-usuario:hover {
+    background: #bb2d3b;
+}
+
+.btn-editar-usuario {
+    background: #0d6efd;
+}
+
+.btn-editar-usuario:hover {
+    background: #0b5ed7;
+}
+
+.botao-laranja {
+    background: #ff6600;
+}
+
+.botao-laranja:hover {
+    background: #e85c00;
+}
+
+.acoes-pagina {
+    min-height: 48px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 18px;
+}
+
+.acoes-pagina #mensagemUsuarios {
+    flex: 1;
+}
+
+.tipo-usuario,
+.situacao-usuario {
+    display: inline-block;
+    min-width: 88px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.tipo-admin {
+    background: #dbe9ff;
+    color: #2459a9;
+}
+
+.tipo-usuario-comum,
+.situacao-ativo {
+    background: #d4edda;
+    color: #218838;
+}
+
+.situacao-inativo {
+    background: #e2e3e5;
+    color: #555555;
+}
+
+.conta-admin-protegida {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 10px;
+    border-radius: 7px;
+    background: #eeeeee;
+    color: #666666;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.linha-destacada {
+    animation: destacarLinha 2.6s ease-out;
+}
+
+@keyframes destacarLinha {
+    0%, 45% {
+        background: #fff0e5;
+        box-shadow: inset 4px 0 #ff6600;
+    }
+    100% {
+        background: transparent;
+    }
+}
+
+.modal-title,
+.form-label {
+    color: #ff6600;
+    font-weight: 800;
+}
+
+.form-control:focus {
+    border-color: #ff6600;
+    box-shadow: 0 0 0 0.15rem rgba(255, 102, 0, 0.2);
+}
+
+@media (max-width: 760px) {
+    .acoes-pagina {
+        flex-direction: column-reverse;
+    }
+}

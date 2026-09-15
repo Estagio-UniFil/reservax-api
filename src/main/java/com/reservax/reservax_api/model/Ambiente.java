@@ -3,6 +3,8 @@ package com.reservax.reservax_api.model;
 import com.reservax.reservax_api.enums.TipoAmbiente;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "ambiente")
 public class Ambiente {
@@ -34,6 +36,9 @@ public class Ambiente {
     private boolean possuiComputadores;
 
     private boolean ativo;
+
+    @Column(name = "data_exclusao")
+    private LocalDateTime dataExclusao;
 
     public Ambiente() {
     }
@@ -124,6 +129,14 @@ public class Ambiente {
 
     public void setAtivo(boolean ativo) {
         this.ativo = ativo;
+    }
+
+    public LocalDateTime getDataExclusao() {
+        return dataExclusao;
+    }
+
+    public void setDataExclusao(LocalDateTime dataExclusao) {
+        this.dataExclusao = dataExclusao;
     }
 
 }

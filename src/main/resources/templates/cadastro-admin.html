@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReservaX - Criar conta administrativa</title>
+    <link rel="stylesheet" href="/css/login.css?v=2">
+</head>
+<body>
+
+<main class="pagina-login">
+    <section class="painel-login">
+        <div class="formulario-area">
+            <div class="login-conteudo">
+                <h1>Criar conta</h1>
+                <p class="subtitulo">Cadastro exclusivo para administradores</p>
+
+                <div id="mensagemCadastro"></div>
+
+                <form id="formCadastroAdmin">
+                    <label class="campo-login">
+                        <span>♙</span>
+                        <input id="nomeAdmin" type="text" placeholder="Nome" required>
+                    </label>
+
+                    <label class="campo-login">
+                        <span>✉</span>
+                        <input id="emailAdmin" type="email" placeholder="E-mail" required>
+                    </label>
+
+                    <label class="campo-login">
+                        <span>▣</span>
+                        <input id="senhaAdmin" type="password" minlength="6" placeholder="Senha" required>
+                    </label>
+
+                    <label class="campo-login">
+                        <span>▣</span>
+                        <input id="confirmacaoSenhaAdmin" type="password" minlength="6" placeholder="Confirmar senha" required>
+                    </label>
+
+                    <button class="botao-principal" type="submit">
+                        Criar conta administrativa
+                    </button>
+                </form>
+
+                <p class="criar-conta">
+                    <a href="/login">Voltar para o login</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="marca-area" aria-hidden="true">
+            <div class="marca-repetida">
+                <span>RESERVAX</span><span>RESERVAX</span><span>RESERVAX</span>
+                <span>RESERVAX</span><span>RESERVAX</span><span>RESERVAX</span>
+                <span>RESERVAX</span><span>RESERVAX</span><span>RESERVAX</span>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script src="/js/api.js?v=1"></script>
+<script src="/js/cadastro-admin.js?v=1"></script>
+</body>
+</html>
