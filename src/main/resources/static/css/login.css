@@ -77,11 +77,45 @@ body {
 
 .campo-login input {
     width: 100%;
+    min-width: 0;
     border: 0;
     outline: 0;
     background: transparent;
     color: #333333;
     font-size: 14px;
+}
+
+.botao-visualizar-senha {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #8b4a40;
+    font-size: 17px;
+    cursor: pointer;
+}
+
+.botao-visualizar-senha:hover,
+.botao-visualizar-senha:focus-visible {
+    background: rgba(255, 102, 0, 0.13);
+    outline: none;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .campo-login input::placeholder {

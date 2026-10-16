@@ -123,8 +123,7 @@ public class UsuarioService implements UserDetailsService {
             );
         }
 
-        usuario.setAtivo(false);
-        return usuarioRepository.save(usuario);
+        return excluirLogicamente(usuario);
     }
 
     public Usuario atualizarPreferenciaNotificacoes(
@@ -139,28 +138,33 @@ public class UsuarioService implements UserDetailsService {
     public void excluirMinhaConta(String email) {
         Usuario usuario = buscarPorEmail(email);
 
-        if (usuario.getTipoUsuario() != TipoUsuario.ADMIN) {
-            throw new RuntimeException(
-                    "A exclusão da própria conta está disponível apenas para administradores."
-            );
+        if (usuario.getTipoUsuario() == TipoUsuario.ADMIN) {
+            List<Usuario> administradoresAtivos = usuarioRepository
+                    .buscarAtivosParaAtualizacao(TipoUsuario.ADMIN);
+
+            if (administradoresAtivos.size() <= 1) {
+                throw new RuntimeException(
+                        "Não é possível excluir o último administrador ativo."
+                );
+            }
         }
 
-        List<Usuario> administradoresAtivos = usuarioRepository
-                .buscarAtivosParaAtualizacao(TipoUsuario.ADMIN);
+        excluirLogicamente(usuario);
+    }
 
-        if (administradoresAtivos.size() <= 1) {
-            throw new RuntimeException(
-                    "Não é possível excluir o último administrador ativo."
-            );
+    private Usuario excluirLogicamente(Usuario usuario) {
+        if (!usuario.getAtivo()) {
+            return usuario;
         }
 
+        usuario.setEmailOriginal(usuario.getEmail());
         usuario.setAtivo(false);
         usuario.setNotificacoesAtivas(false);
         usuario.setDataExclusao(LocalDateTime.now());
         usuario.setEmail(gerarEmailDeContaExcluida(usuario.getId()));
         usuario.setSenha(passwordEncoder.encode(UUID.randomUUID().toString()));
 
-        usuarioRepository.save(usuario);
+        return usuarioRepository.save(usuario);
     }
 
     private Usuario criar(Usuario dados, TipoUsuario tipoUsuario) {
@@ -181,6 +185,7 @@ public class UsuarioService implements UserDetailsService {
         dados.setAtivo(true);
         dados.setNotificacoesAtivas(true);
         dados.setDataExclusao(null);
+        dados.setEmailOriginal(null);
 
         return usuarioRepository.save(dados);
     }

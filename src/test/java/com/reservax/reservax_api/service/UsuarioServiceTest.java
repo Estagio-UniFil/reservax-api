@@ -137,6 +137,30 @@ class UsuarioServiceTest {
         Usuario resultado = usuarioService.desativar(2L);
 
         assertFalse(resultado.getAtivo());
+        assertFalse(resultado.getNotificacoesAtivas());
+        assertNotNull(resultado.getDataExclusao());
+        assertEquals("usuario@reservax.com", resultado.getEmailOriginal());
+        assertNotEquals("usuario@reservax.com", resultado.getEmail());
+        verify(usuarioRepository).save(usuario);
+    }
+
+    @Test
+    void usuarioComumDevePoderExcluirLogicamenteAPropriaConta() {
+        Usuario usuario = criarUsuarioPersistido(
+                2L,
+                "Usuário",
+                "usuario@reservax.com",
+                TipoUsuario.USUARIO
+        );
+        when(usuarioRepository.findByEmailIgnoreCase("usuario@reservax.com"))
+                .thenReturn(Optional.of(usuario));
+
+        usuarioService.excluirMinhaConta("usuario@reservax.com");
+
+        assertFalse(usuario.getAtivo());
+        assertNotNull(usuario.getDataExclusao());
+        assertEquals("usuario@reservax.com", usuario.getEmailOriginal());
+        assertTrue(usuario.getEmail().endsWith("@reservax.invalid"));
         verify(usuarioRepository).save(usuario);
     }
 
@@ -192,6 +216,7 @@ class UsuarioServiceTest {
         assertFalse(administrador.getAtivo());
         assertFalse(administrador.getNotificacoesAtivas());
         assertNotNull(administrador.getDataExclusao());
+        assertEquals("admin@reservax.com", administrador.getEmailOriginal());
         assertNotEquals("admin@reservax.com", administrador.getEmail());
         assertTrue(administrador.getEmail().endsWith("@reservax.invalid"));
         assertNotEquals(senhaAnterior, administrador.getSenha());

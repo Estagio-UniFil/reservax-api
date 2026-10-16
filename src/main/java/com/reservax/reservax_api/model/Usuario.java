@@ -1,5 +1,6 @@
 package com.reservax.reservax_api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.reservax.reservax_api.enums.TipoUsuario;
 import jakarta.persistence.*;
@@ -39,6 +40,10 @@ public class Usuario {
 
     @Column(name = "data_exclusao")
     private LocalDateTime dataExclusao;
+
+    @JsonIgnore
+    @Column(name = "email_original", length = 150)
+    private String emailOriginal;
 
     @PrePersist
     public void prePersist() {
@@ -111,5 +116,13 @@ public class Usuario {
 
     public void setDataExclusao(LocalDateTime dataExclusao) {
         this.dataExclusao = dataExclusao;
+    }
+
+    public String getEmailOriginal() {
+        return emailOriginal;
+    }
+
+    public void setEmailOriginal(String emailOriginal) {
+        this.emailOriginal = emailOriginal;
     }
 }

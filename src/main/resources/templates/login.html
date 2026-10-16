@@ -25,7 +25,7 @@
                     Conta administrativa criada. Faça o login.
                 </div>
                 <div class="mensagem sucesso" th:if="${param.contaExcluida}">
-                    Sua conta foi excluída e a sessão foi encerrada.
+                    Sua conta foi desativada e a sessão foi encerrada.
                 </div>
                 <div class="mensagem erro" th:if="${param.cadastroAdminIndisponivel}">
                     O administrador inicial já foi cadastrado.
@@ -37,10 +37,18 @@
                         <input type="email" name="email" placeholder="E-mail" required autofocus>
                     </label>
 
-                    <label class="campo-login">
-                        <span>▣</span>
-                        <input type="password" name="senha" placeholder="Senha" required>
-                    </label>
+                    <div class="campo-login">
+                        <span aria-hidden="true">▣</span>
+                        <label class="visually-hidden" for="senhaLogin">Senha</label>
+                        <input id="senhaLogin" type="password" name="senha" placeholder="Senha" required>
+                        <button id="alternarVisibilidadeSenha"
+                                class="botao-visualizar-senha"
+                                type="button"
+                                aria-label="Mostrar senha"
+                                aria-pressed="false">
+                            <span aria-hidden="true">👁</span>
+                        </button>
+                    </div>
 
                     <label class="manter-conectado">
                         <input type="checkbox" name="remember-me">
@@ -67,5 +75,6 @@
     </section>
 </main>
 
+<script src="/js/login.js?v=1"></script>
 </body>
 </html>

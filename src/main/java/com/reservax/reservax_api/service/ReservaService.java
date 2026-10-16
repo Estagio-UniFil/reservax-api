@@ -1,5 +1,6 @@
 package com.reservax.reservax_api.service;
 
+import com.reservax.reservax_api.dto.SolicitacaoReservaRecorrenteRequest;
 import com.reservax.reservax_api.model.Ambiente;
 import com.reservax.reservax_api.model.Reserva;
 import com.reservax.reservax_api.model.Usuario;
@@ -13,12 +14,17 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @Transactional
 public class ReservaService {
+
+    private static final int MAXIMO_OCORRENCIAS_POR_SOLICITACAO = 100;
+    private static final int MAXIMO_DIAS_PERIODO_RECORRENTE = 366;
 
     private final ReservaRepository reservaRepository;
     private final AmbienteRepository ambienteRepository;
@@ -153,6 +159,95 @@ public class ReservaService {
         );
 
         return reservaSalva;
+    }
+
+    public List<Reserva> salvarRecorrentes(
+            SolicitacaoReservaRecorrenteRequest solicitacao,
+            String emailUsuario) {
+
+        if (solicitacao == null) {
+            throw new RuntimeException("Informe os dados da reserva recorrente.");
+        }
+
+        Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
+        Ambiente ambiente = buscarAmbienteAtivo(solicitacao.ambienteId());
+        validarSolicitacaoRecorrente(solicitacao);
+
+        List<LocalDate> datasSelecionadas = new ArrayList<>();
+        LocalDate data = solicitacao.dataInicio();
+
+        while (!data.isAfter(solicitacao.dataFim())) {
+            if (solicitacao.diasSemana().contains(data.getDayOfWeek())) {
+                datasSelecionadas.add(data);
+            }
+            data = data.plusDays(1);
+        }
+
+        if (datasSelecionadas.isEmpty()) {
+            throw new RuntimeException(
+                    "O período informado não possui nenhuma ocorrência nos dias selecionados."
+            );
+        }
+
+        if (datasSelecionadas.size() > MAXIMO_OCORRENCIAS_POR_SOLICITACAO) {
+            throw new RuntimeException(
+                    "Uma solicitação pode conter no máximo " +
+                            MAXIMO_OCORRENCIAS_POR_SOLICITACAO + " reservas."
+            );
+        }
+
+        LocalDateTime agora = LocalDateTime.now();
+        List<Reserva> reservas = new ArrayList<>();
+
+        for (LocalDate dataReserva : datasSelecionadas) {
+            LocalDateTime inicioReserva = LocalDateTime.of(
+                    dataReserva,
+                    solicitacao.horaInicio()
+            );
+
+            if (!inicioReserva.isAfter(agora)) {
+                throw new RuntimeException(
+                        "Todas as ocorrências devem possuir data e horário futuros."
+                );
+            }
+
+            if (existeConflito(
+                    ambiente.getId(),
+                    dataReserva,
+                    solicitacao.horaInicio(),
+                    solicitacao.horaFim())) {
+
+                throw new RuntimeException(
+                        "Já existe uma reserva para este ambiente em " +
+                                dataReserva + " no horário informado."
+                );
+            }
+
+            Reserva reserva = new Reserva();
+            reserva.setAmbiente(ambiente);
+            reserva.setUsuario(usuario);
+            reserva.setSolicitante(usuario.getNome());
+            reserva.setDataReserva(dataReserva);
+            reserva.setHoraInicio(solicitacao.horaInicio());
+            reserva.setHoraFim(solicitacao.horaFim());
+            reserva.setObservacao(normalizarObservacao(solicitacao.observacao()));
+            reserva.setStatus(StatusReserva.PENDENTE);
+            reserva.setDataExclusao(null);
+            reservas.add(reserva);
+        }
+
+        List<Reserva> reservasSalvas = reservaRepository.saveAll(reservas);
+        String rota = reservasSalvas.isEmpty()
+                ? "/gerenciar-solicitacoes"
+                : "/gerenciar-solicitacoes?reservaId=" + reservasSalvas.get(0).getId();
+
+        notificacaoService.notificarAdministradores(
+                usuario.getNome() + " criou " + reservasSalvas.size() +
+                        " novas solicitações de reserva recorrente.",
+                rota
+        );
+
+        return reservasSalvas;
     }
 
     public Reserva atualizar(
@@ -450,6 +545,95 @@ public class ReservaService {
                 .isEmpty();
     }
 
+    private boolean existeConflito(
+            Long ambienteId,
+            LocalDate dataReserva,
+            LocalTime horaInicio,
+            LocalTime horaFim) {
+
+        return !reservaRepository
+                .findByDataExclusaoIsNullAndAmbienteIdAndDataReservaAndStatusInAndHoraInicioLessThanAndHoraFimGreaterThan(
+                        ambienteId,
+                        dataReserva,
+                        List.of(StatusReserva.PENDENTE, StatusReserva.APROVADA),
+                        horaFim,
+                        horaInicio
+                )
+                .isEmpty();
+    }
+
+    private Ambiente buscarAmbienteAtivo(Long ambienteId) {
+        if (ambienteId == null) {
+            throw new RuntimeException("Selecione um ambiente.");
+        }
+
+        Ambiente ambiente = ambienteRepository
+                .findByIdAndDataExclusaoIsNull(ambienteId)
+                .orElseThrow(() ->
+                        new RuntimeException("Ambiente não encontrado.")
+                );
+
+        if (!ambiente.getAtivo()) {
+            throw new RuntimeException(
+                    "Não é possível reservar um ambiente inativo."
+            );
+        }
+
+        return ambiente;
+    }
+
+    private void validarSolicitacaoRecorrente(
+            SolicitacaoReservaRecorrenteRequest solicitacao) {
+
+        if (solicitacao.dataInicio() == null || solicitacao.dataFim() == null) {
+            throw new RuntimeException("Informe as datas inicial e final.");
+        }
+
+        if (solicitacao.dataFim().isBefore(solicitacao.dataInicio())) {
+            throw new RuntimeException(
+                    "A data final deve ser igual ou posterior à data inicial."
+            );
+        }
+
+        if (ChronoUnit.DAYS.between(
+                solicitacao.dataInicio(),
+                solicitacao.dataFim()) > MAXIMO_DIAS_PERIODO_RECORRENTE) {
+
+            throw new RuntimeException(
+                    "O período da reserva recorrente não pode ultrapassar um ano."
+            );
+        }
+
+        if (solicitacao.diasSemana() == null ||
+                solicitacao.diasSemana().isEmpty()) {
+            throw new RuntimeException("Selecione pelo menos um dia da semana.");
+        }
+
+        if (solicitacao.horaInicio() == null || solicitacao.horaFim() == null) {
+            throw new RuntimeException("Informe os horários de início e término.");
+        }
+
+        if (!solicitacao.horaInicio().isBefore(solicitacao.horaFim())) {
+            throw new RuntimeException(
+                    "A hora de início deve ser menor que a hora de término."
+            );
+        }
+
+        if (solicitacao.observacao() != null &&
+                solicitacao.observacao().length() > 500) {
+            throw new RuntimeException(
+                    "A observação deve possuir no máximo 500 caracteres."
+            );
+        }
+    }
+
+    private String normalizarObservacao(String observacao) {
+        if (observacao == null || observacao.isBlank()) {
+            return null;
+        }
+        return observacao.trim();
+    }
+
     private void expirarReservasPendentesEncerradas(
             LocalDateTime agora) {
 
@@ -512,6 +696,13 @@ public class ReservaService {
                 );
 
         reserva.setDataExclusao(LocalDateTime.now());
-        reservaRepository.save(reserva);
+        Reserva reservaExcluida = reservaRepository.save(reserva);
+
+        notificacaoService.notificarUsuario(
+                obterUsuarioDaReserva(reservaExcluida),
+                "Sua reserva para " + reservaExcluida.getAmbiente().getNome() +
+                        " foi removida pelo administrador.",
+                "/minhas-reservas"
+        );
     }
 }

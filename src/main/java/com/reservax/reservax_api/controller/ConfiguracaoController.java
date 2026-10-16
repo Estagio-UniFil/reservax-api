@@ -7,7 +7,6 @@ import com.reservax.reservax_api.service.UsuarioService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.CookieClearingLogoutHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -49,7 +48,6 @@ public class ConfiguracaoController {
     }
 
     @DeleteMapping("/conta")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> excluirMinhaConta(
             Authentication authentication,
             HttpServletRequest request,

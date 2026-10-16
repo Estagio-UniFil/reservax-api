@@ -143,11 +143,19 @@ class AutorizacaoControllerTest {
     }
 
     @Test
-    void usuarioComumNaoDeveExcluirAPropriaConta() throws Exception {
+    void usuarioComumDevePoderExcluirLogicamenteAPropriaConta()
+            throws Exception {
+
+        MockHttpSession sessao = new MockHttpSession();
+
         mockMvc.perform(delete("/api/configuracoes/conta")
                         .with(user("usuario@reservax.com").roles("USUARIO"))
+                        .session(sessao)
                         .with(csrf()))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isNoContent());
+
+        verify(usuarioService).excluirMinhaConta("usuario@reservax.com");
+        assertTrue(sessao.isInvalid());
     }
 
     @Test

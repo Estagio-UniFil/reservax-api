@@ -1,5 +1,6 @@
 package com.reservax.reservax_api.service;
 
+import com.reservax.reservax_api.dto.SolicitacaoReservaRecorrenteRequest;
 import com.reservax.reservax_api.enums.StatusReserva;
 import com.reservax.reservax_api.model.Ambiente;
 import com.reservax.reservax_api.model.Reserva;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -263,6 +265,95 @@ class ReservaServiceTest {
         assertNotNull(reserva.getDataExclusao());
         verify(reservaRepository).save(reserva);
         verify(reservaRepository, never()).deleteById(1L);
+    }
+
+    @Test
+    void deveCriarReservasRecorrentesParaOsDiasSelecionados() {
+        Ambiente ambiente = new Ambiente();
+        ambiente.setId(10L);
+        ambiente.setNome("Laboratório 1");
+        ambiente.setAtivo(true);
+
+        LocalDate dataInicio = LocalDate.now().plusDays(1);
+        SolicitacaoReservaRecorrenteRequest solicitacao =
+                new SolicitacaoReservaRecorrenteRequest(
+                        10L,
+                        dataInicio,
+                        dataInicio.plusDays(7),
+                        Set.of(dataInicio.getDayOfWeek()),
+                        LocalTime.of(10, 0),
+                        LocalTime.of(11, 0),
+                        "Encontro semanal"
+                );
+
+        when(ambienteRepository.findByIdAndDataExclusaoIsNull(10L))
+                .thenReturn(Optional.of(ambiente));
+        when(reservaRepository
+                .findByDataExclusaoIsNullAndAmbienteIdAndDataReservaAndStatusInAndHoraInicioLessThanAndHoraFimGreaterThan(
+                        any(), any(), any(), any(), any()
+                ))
+                .thenReturn(List.of());
+        when(reservaRepository.saveAll(any()))
+                .thenAnswer(invocacao -> invocacao.getArgument(0));
+
+        List<Reserva> resultado = reservaService.salvarRecorrentes(
+                solicitacao,
+                "mario@reservax.com"
+        );
+
+        assertEquals(2, resultado.size());
+        assertEquals(dataInicio, resultado.get(0).getDataReserva());
+        assertEquals(dataInicio.plusDays(7), resultado.get(1).getDataReserva());
+        assertTrue(resultado.stream().allMatch(
+                reserva -> reserva.getStatus() == StatusReserva.PENDENTE
+        ));
+        verify(reservaRepository).saveAll(any());
+        verify(notificacaoService).notificarAdministradores(
+                any(),
+                any()
+        );
+    }
+
+    @Test
+    void naoDeveSalvarLoteQuandoUmaOcorrenciaPossuiConflito() {
+        Ambiente ambiente = new Ambiente();
+        ambiente.setId(10L);
+        ambiente.setAtivo(true);
+
+        LocalDate data = LocalDate.now().plusDays(1);
+        SolicitacaoReservaRecorrenteRequest solicitacao =
+                new SolicitacaoReservaRecorrenteRequest(
+                        10L,
+                        data,
+                        data,
+                        Set.of(data.getDayOfWeek()),
+                        LocalTime.of(10, 0),
+                        LocalTime.of(11, 0),
+                        null
+                );
+
+        when(ambienteRepository.findByIdAndDataExclusaoIsNull(10L))
+                .thenReturn(Optional.of(ambiente));
+        when(reservaRepository
+                .findByDataExclusaoIsNullAndAmbienteIdAndDataReservaAndStatusInAndHoraInicioLessThanAndHoraFimGreaterThan(
+                        any(), any(), any(), any(), any()
+                ))
+                .thenReturn(List.of(new Reserva()));
+
+        RuntimeException erro = assertThrows(
+                RuntimeException.class,
+                () -> reservaService.salvarRecorrentes(
+                        solicitacao,
+                        "mario@reservax.com"
+                )
+        );
+
+        assertTrue(erro.getMessage().contains("Já existe uma reserva"));
+        verify(reservaRepository, never()).saveAll(any());
+        verify(notificacaoService, never()).notificarAdministradores(
+                any(),
+                any()
+        );
     }
 
     private Reserva criarReservaCanceladaFutura() {

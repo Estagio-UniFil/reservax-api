@@ -1,5 +1,7 @@
 package com.reservax.reservax_api.controller;
 
+import com.reservax.reservax_api.dto.ReservaLoteResponse;
+import com.reservax.reservax_api.dto.SolicitacaoReservaRecorrenteRequest;
 import com.reservax.reservax_api.model.Reserva;
 import com.reservax.reservax_api.service.ReservaService;
 import org.springframework.http.ResponseEntity;
@@ -55,6 +57,20 @@ public class ReservaController {
         return reservaService.salvar(
                 reserva,
                 authentication.getName()
+        );
+    }
+
+    @PostMapping("/lote")
+    @PreAuthorize("hasRole('USUARIO')")
+    public ReservaLoteResponse salvarEmLote(
+            @RequestBody SolicitacaoReservaRecorrenteRequest solicitacao,
+            Authentication authentication) {
+
+        return ReservaLoteResponse.de(
+                reservaService.salvarRecorrentes(
+                        solicitacao,
+                        authentication.getName()
+                )
         );
     }
 

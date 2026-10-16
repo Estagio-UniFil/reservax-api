@@ -16,13 +16,16 @@ public class NotificacaoService {
 
     private final NotificacaoRepository notificacaoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final EmailService emailService;
 
     public NotificacaoService(
             NotificacaoRepository notificacaoRepository,
-            UsuarioRepository usuarioRepository) {
+            UsuarioRepository usuarioRepository,
+            EmailService emailService) {
 
         this.notificacaoRepository = notificacaoRepository;
         this.usuarioRepository = usuarioRepository;
+        this.emailService = emailService;
     }
 
     @Transactional(readOnly = true)
@@ -53,11 +56,9 @@ public class NotificacaoService {
         List<Usuario> administradores = usuarioRepository
                 .findByTipoUsuarioAndAtivoTrue(TipoUsuario.ADMIN);
 
-        administradores.stream()
-                .filter(Usuario::getNotificacoesAtivas)
-                .forEach(administrador ->
-                        criar(administrador, mensagem, rota)
-                );
+        administradores.forEach(administrador ->
+                notificar(administrador, mensagem, rota)
+        );
     }
 
     public void notificarUsuario(
@@ -65,11 +66,22 @@ public class NotificacaoService {
             String mensagem,
             String rota) {
 
-        if (usuario != null &&
-                usuario.getAtivo() &&
-                usuario.getNotificacoesAtivas()) {
-            criar(usuario, mensagem, rota);
+        notificar(usuario, mensagem, rota);
+    }
+
+    private void notificar(
+            Usuario usuario,
+            String mensagem,
+            String rota) {
+
+        if (usuario == null ||
+                !usuario.getAtivo() ||
+                !usuario.getNotificacoesAtivas()) {
+            return;
         }
+
+        criar(usuario, mensagem, rota);
+        emailService.enviarNotificacao(usuario, mensagem);
     }
 
     private void criar(

@@ -28,6 +28,9 @@ class NotificacaoServiceTest {
     @Mock
     private UsuarioRepository usuarioRepository;
 
+    @Mock
+    private EmailService emailService;
+
     @InjectMocks
     private NotificacaoService notificacaoService;
 
@@ -80,6 +83,25 @@ class NotificacaoServiceTest {
         );
 
         verify(notificacaoRepository, never()).save(any(Notificacao.class));
+        verify(emailService, never()).enviarNotificacao(any(), any());
+    }
+
+    @Test
+    void deveCriarNotificacaoEEnviarEmailQuandoPreferenciaEstaAtiva() {
+        Usuario usuario = criarUsuario("mario@reservax.com");
+        usuario.setNotificacoesAtivas(true);
+
+        notificacaoService.notificarUsuario(
+                usuario,
+                "Reserva aprovada.",
+                "/minhas-reservas"
+        );
+
+        verify(notificacaoRepository).save(any(Notificacao.class));
+        verify(emailService).enviarNotificacao(
+                usuario,
+                "Reserva aprovada."
+        );
     }
 
     private Usuario criarUsuario(String email) {
