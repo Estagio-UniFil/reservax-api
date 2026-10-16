@@ -1,0 +1,119 @@
+.somente-admin,
+.somente-usuario {
+    display: none !important;
+}
+
+body.perfil-admin .somente-admin,
+body.perfil-usuario .somente-usuario {
+    display: flex !important;
+}
+
+.notificacoes-area {
+    position: relative;
+}
+
+.botao-notificacoes {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    font-size: 25px;
+    cursor: pointer;
+}
+
+.botao-notificacoes:hover {
+    background: #fff3e8;
+}
+
+.bolinha-notificacao {
+    position: absolute;
+    top: 4px;
+    right: 3px;
+    width: 11px;
+    height: 11px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    background: #ff6600;
+}
+
+.bolinha-notificacao[hidden] {
+    display: none;
+}
+
+.painel-notificacoes {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: -20px;
+    z-index: 10000;
+    width: min(360px, calc(100vw - 32px));
+    overflow: hidden;
+    border: 1px solid #eeeeee;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
+}
+
+.painel-notificacoes[hidden] {
+    display: none;
+}
+
+.painel-notificacoes h2 {
+    margin: 0;
+    padding: 16px 18px;
+    border-bottom: 1px solid #eeeeee;
+    color: #ff6600;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.lista-notificacoes {
+    max-height: 330px;
+    overflow-y: auto;
+}
+
+.item-notificacao {
+    width: 100%;
+    display: block;
+    padding: 14px 18px;
+    border: 0;
+    border-bottom: 1px solid #f0f0f0;
+    background: #ffffff;
+    color: #333333;
+    text-align: left;
+    cursor: pointer;
+}
+
+.item-notificacao:hover {
+    background: #fff7f0;
+}
+
+.item-notificacao strong {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.item-notificacao small {
+    color: #888888;
+    font-size: 11px;
+}
+
+.notificacoes-vazias {
+    margin: 0;
+    padding: 24px 18px;
+    color: #777777;
+    text-align: center;
+    font-size: 13px;
+}
+
+.logout {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}

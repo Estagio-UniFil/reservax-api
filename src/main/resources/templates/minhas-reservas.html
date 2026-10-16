@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>ReservaX - Minhas Reservas</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/minhas-reservas.css?v=4">
+    <link rel="stylesheet" href="/css/notificacoes.css?v=1">
+</head>
+<body>
+
+<div class="layout">
+
+    <aside class="sidebar">
+        <div class="logo-area">
+            <div class="logo-box">R</div>
+            <h2>ReservaX</h2>
+        </div>
+
+        <nav class="menu">
+            <a href="/">▦ <span>Dashboard</span></a>
+            <a href="/solicitar-reserva" class="somente-usuario">▣ <span>Solicitar Reserva</span></a>
+            <a href="/gerenciar-solicitacoes" class="somente-admin">▣ <span>Gerenciar Solicitações</span></a>
+            <a href="/minhas-reservas" class="active somente-usuario">◷ <span>Minhas reservas</span></a>
+            <a href="/salas">▤ <span>Ambientes</span></a>
+            <a href="/usuarios" class="somente-admin">👥 <span>Usuários</span></a>
+            <a href="/configuracoes">⚙ <span>Configurações</span></a>
+        </nav>
+
+        <button type="button" class="logout" data-acao-sair>↪ <span>Sair</span></button>
+    </aside>
+
+    <main class="content">
+
+        <header class="topbar">
+            <h1>Minhas Reservas</h1>
+
+            <div class="user-area">
+                <div class="notificacoes-area">
+                    <button id="botaoNotificacoes" class="botao-notificacoes" type="button" aria-label="Notificações" aria-expanded="false">
+                        🔔
+                        <span id="bolinhaNotificacao" class="bolinha-notificacao" hidden></span>
+                    </button>
+                    <div id="painelNotificacoes" class="painel-notificacoes" hidden>
+                        <h2>Notificações</h2>
+                        <div id="listaNotificacoes" class="lista-notificacoes"></div>
+                    </div>
+                </div>
+                <div class="divider"></div>
+                <div class="avatar">R</div>
+
+                <div>
+                    <strong data-usuario-nome>Mario</strong>
+                    <p data-usuario-tipo>Usuário</p>
+                </div>
+            </div>
+        </header>
+
+        <section class="page-body">
+            <div id="mensagemReservas"></div>
+
+            <div class="filtro-reservas">
+                <div>
+                    <label for="filtroPeriodo" class="form-label mb-1">
+                        Exibir reservas
+                    </label>
+                    <select id="filtroPeriodo" class="form-select">
+                        <option value="atuais" selected>Atuais e futuras</option>
+                        <option value="antigas">Antigas</option>
+                    </select>
+                </div>
+                <p id="descricaoFiltro" class="descricao-filtro">
+                    Reservas em andamento ou que ainda vão acontecer.
+                </p>
+            </div>
+
+            <div class="reservas-card">
+                <table class="table reservas-table">
+                    <thead>
+                        <tr>
+                            <th>Ambiente</th>
+                            <th>Data</th>
+                            <th>Horário</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaMinhasReservas"></tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+</div>
+
+<div class="modal fade"
+     id="modalEditarReserva"
+     tabindex="-1"
+     aria-labelledby="modalEditarReservaLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditarReservaLabel">
+                    Editar reserva
+                </h5>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Fechar">
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <form id="formEditarReserva">
+                    <input type="hidden" id="reservaEdicaoId">
+
+                    <div class="mb-3">
+                        <label for="ambienteEdicao" class="form-label">Ambiente</label>
+                        <select id="ambienteEdicao" class="form-control" required>
+                            <option value="">Selecione um ambiente</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="dataEdicao" class="form-label">Data</label>
+                        <input type="date" id="dataEdicao" class="form-control" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="horaInicioEdicao" class="form-label">Horário de início</label>
+                            <input type="time" id="horaInicioEdicao" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="horaFimEdicao" class="form-label">Horário de término</label>
+                            <input type="time" id="horaFimEdicao" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="observacaoEdicao" class="form-label">Observação</label>
+                        <textarea id="observacaoEdicao"
+                                  class="form-control"
+                                  rows="3"
+                                  maxlength="500"></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-salvar-edicao" form="formEditarReserva">
+                    Salvar alterações
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/api.js?v=1"></script>
+<script src="/js/notificacoes.js?v=1"></script>
+<script src="/js/minhas-reservas.js?v=7"></script>
+
+</body>
+</html>

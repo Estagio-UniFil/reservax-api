@@ -1,20 +1,23 @@
 let idSalaEmEdicao = null;
 let listaAmbientes = [];
 let filtroAtual = "TODAS";
+let usuarioAdmin = false;
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
     const botaoSalvar = document.querySelector(".btn-salvar-sala");
     const formNovaSala = document.getElementById("formNovaSala");
 
     const botaoFiltroSalas = document.getElementById("botaoFiltroSalas");
     const menuFiltroSalas = document.getElementById("menuFiltroSalas");
 
+    await carregarPerfilUsuario();
     carregarSalas();
 
     if (botaoFiltroSalas && menuFiltroSalas) {
         botaoFiltroSalas.addEventListener("click", function (event) {
             event.stopPropagation();
-            menuFiltroSalas.classList.toggle("mostrar");
+            const menuAberto = menuFiltroSalas.classList.toggle("mostrar");
+            botaoFiltroSalas.setAttribute("aria-expanded", menuAberto);
         });
 
         menuFiltroSalas.addEventListener("click", function (event) {
@@ -23,6 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         document.addEventListener("click", function () {
             menuFiltroSalas.classList.remove("mostrar");
+            botaoFiltroSalas.setAttribute("aria-expanded", "false");
         });
     }
 
@@ -37,16 +41,16 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
             if (idSalaEmEdicao === null) {
                 await cadastrarSala(ambiente);
-                alert("Sala cadastrada com sucesso!");
+                alert("Ambiente cadastrado com sucesso!");
             } else {
                 await editarSala(idSalaEmEdicao, ambiente);
-                alert("Sala salva com sucesso!");
+                alert("Ambiente salvo com sucesso!");
             }
 
             formNovaSala.reset();
             idSalaEmEdicao = null;
 
-            document.getElementById("modalNovaSalaLabel").innerText = "Cadastrar nova sala";
+            document.getElementById("modalNovaSalaLabel").innerText = "Cadastrar novo ambiente";
             botaoSalvar.innerText = "Salvar";
 
             const modal = bootstrap.Modal.getInstance(document.getElementById("modalNovaSala"));
@@ -56,14 +60,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
         } catch (erro) {
             console.error(erro);
-            alert("Não foi possível salvar a sala.");
+            alert("Não foi possível salvar o ambiente.");
         }
     });
 
     document.getElementById("modalNovaSala").addEventListener("hidden.bs.modal", function () {
         formNovaSala.reset();
         idSalaEmEdicao = null;
-        document.getElementById("modalNovaSalaLabel").innerText = "Cadastrar nova sala";
+        document.getElementById("modalNovaSalaLabel").innerText = "Cadastrar novo ambiente";
         botaoSalvar.innerText = "Salvar";
     });
 });
@@ -84,7 +88,7 @@ function montarObjetoAmbiente() {
 }
 
 async function cadastrarSala(ambiente) {
-    const resposta = await fetch("/ambientes", {
+    const resposta = await fetchComCsrf("/ambientes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(ambiente)
@@ -98,7 +102,7 @@ async function cadastrarSala(ambiente) {
 }
 
 async function editarSala(id, ambiente) {
-    const resposta = await fetch(`/ambientes/${id}`, {
+    const resposta = await fetchComCsrf(`/ambientes/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(ambiente)
@@ -112,14 +116,14 @@ async function editarSala(id, ambiente) {
 }
 
 async function excluirSala(id) {
-    const confirmar = confirm("Tem certeza que deseja excluir esta sala?");
+    const confirmar = confirm("Tem certeza que deseja excluir este ambiente?");
 
     if (!confirmar) {
         return;
     }
 
     try {
-        const resposta = await fetch(`/ambientes/${id}`, {
+        const resposta = await fetchComCsrf(`/ambientes/${id}`, {
             method: "DELETE"
         });
 
@@ -127,13 +131,13 @@ async function excluirSala(id) {
             throw new Error("Erro ao excluir ambiente.");
         }
 
-        alert("Sala excluída com sucesso!");
+        alert("Ambiente excluído com sucesso!");
 
         await carregarSalas();
 
     } catch (erro) {
         console.error(erro);
-        alert("Não foi possível excluir a sala.");
+        alert("Não foi possível excluir o ambiente.");
     }
 }
 
@@ -151,7 +155,7 @@ async function carregarSalas() {
 
     } catch (erro) {
         console.error(erro);
-        alert("Não foi possível carregar as salas cadastradas.");
+        alert("Não foi possível carregar os ambientes cadastrados.");
     }
 }
 
@@ -168,7 +172,7 @@ function renderizarSalas() {
     if (ambientesFiltrados.length === 0) {
         cardsGrid.innerHTML = `
             <div class="empty-message">
-                Nenhuma sala encontrada para este filtro.
+                Nenhum ambiente encontrado para este filtro.
             </div>
         `;
         return;
@@ -186,13 +190,36 @@ function filtrarSalas(tipo) {
     const menuFiltro = document.getElementById("menuFiltroSalas");
 
     if (tipo === "TODAS") {
-        botaoFiltro.innerHTML = "Visualizar salas <span>∨</span>";
+        botaoFiltro.innerHTML = "Visualizar ambientes <span>∨</span>";
     } else {
         botaoFiltro.innerHTML = `${formatarTipoAmbiente(tipo)} <span>∨</span>`;
     }
 
     if (menuFiltro) {
         menuFiltro.classList.remove("mostrar");
+    }
+
+    document.getElementById("botaoFiltroSalas")
+        .setAttribute("aria-expanded", "false");
+
+    document.querySelectorAll("#menuFiltroSalas button")
+        .forEach(botao => botao.classList.remove("ativo"));
+
+    const opcoesFiltro = {
+        TODAS: 0,
+        SALA_AULA: 1,
+        LABORATORIO: 2,
+        AUDITORIO: 3,
+        SALA_REUNIAO: 4,
+        BIBLIOTECA: 5
+    };
+
+    const botaoSelecionado = document.querySelectorAll(
+        "#menuFiltroSalas button"
+    )[opcoesFiltro[tipo]];
+
+    if (botaoSelecionado) {
+        botaoSelecionado.classList.add("ativo");
     }
 
     renderizarSalas();
@@ -230,15 +257,17 @@ function adicionarCardNaTela(ambiente) {
 
         <p class="capacity">👥 Capacidade: ${ambiente.capacidade} pessoas</p>
 
-        <div class="card-actions">
-            <button class="btn-editar-sala" onclick="abrirModalEdicao(${ambiente.id})">
-                Editar
-            </button>
+        ${usuarioAdmin ? `
+            <div class="card-actions">
+                <button class="btn-editar-sala" onclick="abrirModalEdicao(${ambiente.id})">
+                    Editar
+                </button>
 
-            <button class="btn-excluir-sala" onclick="excluirSala(${ambiente.id})">
-                Excluir
-            </button>
-        </div>
+                <button class="btn-excluir-sala" onclick="excluirSala(${ambiente.id})">
+                    Excluir
+                </button>
+            </div>
+        ` : ""}
     `;
 
     cardsGrid.appendChild(card);
@@ -267,7 +296,7 @@ async function abrirModalEdicao(id) {
         document.getElementById("possuiMicrofone").checked = ambiente.possuiMicrofone;
         document.getElementById("possuiComputadores").checked = ambiente.possuiComputadores;
 
-        document.getElementById("modalNovaSalaLabel").innerText = "Editar sala";
+        document.getElementById("modalNovaSalaLabel").innerText = "Editar ambiente";
         document.querySelector(".btn-salvar-sala").innerText = "Salvar";
 
         const modal = new bootstrap.Modal(document.getElementById("modalNovaSala"));
@@ -275,7 +304,7 @@ async function abrirModalEdicao(id) {
 
     } catch (erro) {
         console.error(erro);
-        alert("Não foi possível carregar os dados da sala.");
+        alert("Não foi possível carregar os dados do ambiente.");
     }
 }
 
@@ -289,4 +318,19 @@ function formatarTipoAmbiente(tipo) {
     };
 
     return tipos[tipo] || tipo;
+}
+
+async function carregarPerfilUsuario() {
+    try {
+        const resposta = await fetch("/auth/me");
+        const usuario = await resposta.json();
+        usuarioAdmin = resposta.ok && usuario.tipoUsuario === "ADMIN";
+
+        const areaAdicionar = document.querySelector(".add-area");
+        if (areaAdicionar) {
+            areaAdicionar.hidden = !usuarioAdmin;
+        }
+    } catch (erro) {
+        usuarioAdmin = false;
+    }
 }

@@ -150,7 +150,24 @@ body {
 }
 
 .subtitle {
+    margin-bottom: 6px;
+}
+
+.legenda-obrigatorios {
     margin-bottom: 22px;
+    color: #666;
+    font-size: 12px;
+}
+
+.campo-obrigatorio {
+    color: #c62828;
+    font-weight: 800;
+}
+
+.campo-opcional {
+    color: #777;
+    font-size: 12px;
+    font-weight: 400;
 }
 
 .reserva-card {
@@ -167,6 +184,99 @@ body {
     font-size: 18px;
     font-weight: 800;
     margin-bottom: 10px;
+}
+
+.recorrencia-card > legend,
+.dias-semana legend {
+    float: none;
+    width: auto;
+    margin-bottom: 12px;
+    color: #ff6600;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.opcoes-recorrencia {
+    display: flex;
+    flex-direction: column;
+    max-width: 420px;
+}
+
+.opcao-lista {
+    display: flex;
+    align-items: center;
+    min-height: 42px;
+    margin: 0;
+    padding: 10px 12px 10px 38px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.opcao-lista:last-child {
+    border-bottom: 0;
+}
+
+.opcao-lista:hover {
+    background: #fff7f0;
+}
+
+.opcao-lista .form-check-label {
+    width: 100%;
+    color: #444;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.opcao-lista .form-check-input {
+    margin-top: 0;
+    accent-color: #ff6600;
+    cursor: pointer;
+}
+
+.opcao-lista .form-check-input:checked {
+    background-color: #ff6600;
+    border-color: #ff6600;
+}
+
+.opcao-lista .form-check-input:focus {
+    border-color: #ff6600;
+    box-shadow: 0 0 0 0.15rem rgba(255, 102, 0, 0.20);
+}
+
+.campos-recorrencia {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid #f0c4a7;
+}
+
+.campos-recorrencia[hidden] {
+    display: none;
+}
+
+.dias-semana {
+    min-width: 0;
+    max-width: 420px;
+}
+
+.dias-semana-opcoes {
+    display: flex;
+    flex-direction: column;
+}
+
+.campo-data-final {
+    max-width: 420px;
+}
+
+.resumo-recorrencia {
+    margin: 0;
+    max-width: 620px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: #fff3e8;
+    color: #8a3d00;
+    font-size: 13px;
 }
 
 .form-label {
@@ -266,4 +376,51 @@ textarea.form-control {
 .alert {
     margin-bottom: 16px;
     border-radius: 8px;
+}
+
+@media (max-width: 760px) {
+    .layout {
+        display: block;
+    }
+
+    .sidebar {
+        width: 100%;
+        padding: 18px 16px;
+    }
+
+    .logo-area {
+        margin-bottom: 20px;
+    }
+
+    .menu {
+        gap: 8px;
+    }
+
+    .topbar {
+        height: auto;
+        min-height: 88px;
+        gap: 16px;
+        padding: 18px;
+    }
+
+    .topbar h1,
+    .form-card h2 {
+        font-size: 24px;
+    }
+
+    .page-body {
+        padding: 24px 16px;
+    }
+
+    .campos-recorrencia {
+        grid-template-columns: 1fr;
+    }
+
+    .actions {
+        flex-direction: column-reverse;
+    }
+
+    .actions .btn {
+        width: 100%;
+    }
 }

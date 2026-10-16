@@ -1,5 +1,6 @@
 package com.reservax.reservax_api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.reservax.reservax_api.enums.StatusReserva;
 import jakarta.persistence.*;
 
@@ -22,6 +23,11 @@ public class Reserva {
     @Column(nullable = false, length = 100)
     private String solicitante;
 
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    @JsonIgnore
+    private Usuario usuario;
+
     @Column(name = "data_reserva", nullable = false)
     private LocalDate dataReserva;
 
@@ -41,6 +47,12 @@ public class Reserva {
     @Column(name = "data_criacao", nullable = false)
     private LocalDateTime dataCriacao;
 
+    @Column(name = "data_exclusao")
+    private LocalDateTime dataExclusao;
+
+    @Transient
+    private boolean reaberturaDisponivel;
+
     public Reserva() {
     }
 
@@ -57,6 +69,10 @@ public class Reserva {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public Ambiente getAmbiente() {
         return ambiente;
     }
@@ -71,6 +87,14 @@ public class Reserva {
 
     public void setSolicitante(String solicitante) {
         this.solicitante = solicitante;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
     public LocalDate getDataReserva() {
@@ -115,5 +139,21 @@ public class Reserva {
 
     public LocalDateTime getDataCriacao() {
         return dataCriacao;
+    }
+
+    public LocalDateTime getDataExclusao() {
+        return dataExclusao;
+    }
+
+    public void setDataExclusao(LocalDateTime dataExclusao) {
+        this.dataExclusao = dataExclusao;
+    }
+
+    public boolean isReaberturaDisponivel() {
+        return reaberturaDisponivel;
+    }
+
+    public void setReaberturaDisponivel(boolean reaberturaDisponivel) {
+        this.reaberturaDisponivel = reaberturaDisponivel;
     }
 }

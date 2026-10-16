@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReservaX - Configurações</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/dashboard.css?v=2">
+    <link rel="stylesheet" href="/css/notificacoes.css?v=1">
+    <link rel="stylesheet" href="/css/configuracoes.css?v=1">
+</head>
+<body>
+
+<div class="layout">
+    <aside class="sidebar">
+        <div class="logo-area">
+            <div class="logo-box">R</div>
+            <h2>ReservaX</h2>
+        </div>
+
+        <nav class="menu" aria-label="Menu principal">
+            <a href="/">▦ <span>Dashboard</span></a>
+            <a href="/solicitar-reserva" class="somente-usuario">▣ <span>Solicitar Reserva</span></a>
+            <a href="/gerenciar-solicitacoes" class="somente-admin">▣ <span>Gerenciar Solicitações</span></a>
+            <a href="/minhas-reservas" class="somente-usuario">◷ <span>Minhas reservas</span></a>
+            <a href="/salas">▤ <span>Ambientes</span></a>
+            <a href="/usuarios" class="somente-admin">👥 <span>Usuários</span></a>
+            <a href="/configuracoes" class="active">⚙ <span>Configurações</span></a>
+        </nav>
+
+        <button type="button" class="logout" data-acao-sair>↪ <span>Sair</span></button>
+    </aside>
+
+    <main class="content">
+        <header class="topbar">
+            <h1>Configurações</h1>
+
+            <div class="user-area">
+                <div class="notificacoes-area">
+                    <button id="botaoNotificacoes" class="botao-notificacoes" type="button" aria-label="Notificações" aria-expanded="false">
+                        🔔
+                        <span id="bolinhaNotificacao" class="bolinha-notificacao" hidden></span>
+                    </button>
+                    <div id="painelNotificacoes" class="painel-notificacoes" hidden>
+                        <h2>Notificações</h2>
+                        <div id="listaNotificacoes" class="lista-notificacoes"></div>
+                    </div>
+                </div>
+                <div class="divider"></div>
+                <div class="avatar">R</div>
+                <div>
+                    <strong data-usuario-nome>Usuário</strong>
+                    <p data-usuario-tipo>Perfil</p>
+                </div>
+            </div>
+        </header>
+
+        <section class="page-body configuracoes-conteudo">
+            <div id="mensagemConfiguracoes" role="status" aria-live="polite"></div>
+
+            <section class="configuracao-card" aria-labelledby="tituloInformacoes">
+                <div class="configuracao-cabecalho">
+                    <div class="icone-configuracao" aria-hidden="true">●</div>
+                    <div>
+                        <h2 id="tituloInformacoes">Informações do usuário</h2>
+                        <p>Dados vinculados à sua conta no ReservaX.</p>
+                    </div>
+                </div>
+
+                <div class="perfil-resumo">
+                    <div id="avatarConfiguracoes" class="avatar-configuracoes">R</div>
+                    <div>
+                        <strong id="nomeResumo">Carregando...</strong>
+                        <span id="tipoResumo">Perfil</span>
+                    </div>
+                </div>
+
+                <div class="campos-usuario">
+                    <label>
+                        <span>Nome completo</span>
+                        <input id="configuracaoNome" type="text" readonly>
+                    </label>
+                    <label>
+                        <span>E-mail</span>
+                        <input id="configuracaoEmail" type="email" readonly>
+                    </label>
+                    <label>
+                        <span>Perfil</span>
+                        <input id="configuracaoPerfil" type="text" readonly>
+                    </label>
+                </div>
+            </section>
+
+            <section class="configuracao-card" aria-labelledby="tituloNotificacoes">
+                <div class="configuracao-cabecalho">
+                    <div class="icone-configuracao" aria-hidden="true">🔔</div>
+                    <div>
+                        <h2 id="tituloNotificacoes">Preferências de notificações</h2>
+                        <p>Escolha se deseja receber avisos no sistema e também por e-mail.</p>
+                    </div>
+                </div>
+
+                <form id="formNotificacoes" class="preferencia-linha">
+                    <div>
+                        <strong>Notificações de reservas</strong>
+                        <p>Receba atualizações sobre solicitações, aprovações e alterações no sistema e no seu e-mail.</p>
+                    </div>
+                    <label class="interruptor" for="notificacoesAtivas">
+                        <input id="notificacoesAtivas" type="checkbox">
+                        <span aria-hidden="true"></span>
+                        <span class="visually-hidden">Ativar notificações de reservas</span>
+                    </label>
+                    <button id="salvarNotificacoes" class="botao-salvar" type="submit">
+                        Salvar preferências
+                    </button>
+                </form>
+            </section>
+
+            <section class="configuracao-card zona-perigo" aria-labelledby="tituloExcluirConta">
+                <div class="configuracao-cabecalho">
+                    <div class="icone-configuracao icone-perigo" aria-hidden="true">!</div>
+                    <div>
+                        <h2 id="tituloExcluirConta">Excluir minha conta</h2>
+                        <p>A conta será desativada, seu e-mail será liberado e todos os dados históricos serão preservados.</p>
+                    </div>
+                </div>
+
+                <div class="exclusao-linha">
+                    <p>Essa ação encerra sua sessão e não pode ser desfeita por esta tela.</p>
+                    <button id="abrirExclusaoConta" class="botao-excluir" type="button">
+                        Excluir minha conta
+                    </button>
+                </div>
+            </section>
+        </section>
+    </main>
+</div>
+
+<dialog id="dialogoExclusao" class="dialogo-exclusao" aria-labelledby="tituloDialogoExclusao">
+    <form method="dialog">
+        <button class="fechar-dialogo" value="cancel" aria-label="Fechar">×</button>
+        <div class="icone-alerta" aria-hidden="true">!</div>
+        <h2 id="tituloDialogoExclusao">Excluir sua conta?</h2>
+        <p>Você perderá o acesso imediatamente. Reservas e demais registros históricos serão mantidos.</p>
+        <div class="acoes-dialogo">
+            <button class="botao-cancelar" value="cancel">Cancelar</button>
+            <button id="confirmarExclusaoConta" class="botao-excluir" value="confirmar" type="button">
+                Sim, excluir conta
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<script src="/js/api.js?v=1"></script>
+<script src="/js/notificacoes.js?v=1"></script>
+<script src="/js/configuracoes.js?v=2"></script>
+</body>
+</html>

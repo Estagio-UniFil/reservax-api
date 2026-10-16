@@ -2,10 +2,11 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>ReservaX - Salas</title>
+    <title>ReservaX - Ambientes</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/css/salas.css">
+    <link rel="stylesheet" href="/css/salas.css?v=3">
+    <link rel="stylesheet" href="/css/notificacoes.css?v=1">
 </head>
 <body>
 
@@ -18,30 +19,40 @@
         </div>
 
         <nav class="menu">
-            <a href="#">▦ <span>Dashboard</span></a>
-            <a href="/solicitar-reserva">▣ <span>Solicitar Reserva</span></a>
-            <a href="#">◷ <span>Minhas reservas</span></a>
-            <a href="#" class="active">▤ <span>Salas</span></a>
-            <a href="#">👥 <span>Usuários</span></a>
-            <a href="#">⚙ <span>Configurações</span></a>
+            <a href="/">▦ <span>Dashboard</span></a>
+            <a href="/solicitar-reserva" class="somente-usuario">▣ <span>Solicitar Reserva</span></a>
+            <a href="/gerenciar-solicitacoes" class="somente-admin">▣ <span>Gerenciar Solicitações</span></a>
+            <a href="/minhas-reservas" class="somente-usuario">◷ <span>Minhas reservas</span></a>
+            <a href="#" class="active">▤ <span>Ambientes</span></a>
+            <a href="/usuarios" class="somente-admin">👥 <span>Usuários</span></a>
+            <a href="/configuracoes">⚙ <span>Configurações</span></a>
         </nav>
 
-        <a href="#" class="logout">↪ <span>Sair</span></a>
+        <button type="button" class="logout" data-acao-sair>↪ <span>Sair</span></button>
     </aside>
 
     <main class="content">
 
         <header class="topbar">
-            <h1>Salas</h1>
+            <h1>Ambientes</h1>
 
             <div class="user-area">
-                <div class="bell">🔔</div>
+                <div class="notificacoes-area">
+                    <button id="botaoNotificacoes" class="botao-notificacoes" type="button" aria-label="Notificações" aria-expanded="false">
+                        🔔
+                        <span id="bolinhaNotificacao" class="bolinha-notificacao" hidden></span>
+                    </button>
+                    <div id="painelNotificacoes" class="painel-notificacoes" hidden>
+                        <h2>Notificações</h2>
+                        <div id="listaNotificacoes" class="lista-notificacoes"></div>
+                    </div>
+                </div>
                 <div class="divider"></div>
                 <div class="avatar">R</div>
 
                 <div>
-                    <strong>Tiago Galvão</strong>
-                    <p>Coordenador</p>
+                    <strong data-usuario-nome>Mario</strong>
+                    <p data-usuario-tipo>Usuário</p>
                 </div>
             </div>
         </header>
@@ -50,8 +61,12 @@
 
             <div class="filter-area">
                 <div class="filtro-salas">
-                    <button class="filter-button" id="botaoFiltroSalas" type="button">
-                        Visualizar salas <span>∨</span>
+                    <button class="filter-button"
+                            id="botaoFiltroSalas"
+                            type="button"
+                            aria-expanded="false"
+                            aria-controls="menuFiltroSalas">
+                        Visualizar ambientes <span>∨</span>
                     </button>
 
                     <div class="menu-filtro-salas" id="menuFiltroSalas">
@@ -66,14 +81,14 @@
             </div>  
 
             <div class="cards-grid" id="listaSalas">
-                <!-- Salas serão carregadas via JavaScript -->
+                <!-- Ambientes serão carregados via JavaScript -->
             </div>
 
             <div class="add-area">
                 <button class="add-button"
                         data-bs-toggle="modal"
                         data-bs-target="#modalNovaSala">
-                    <span>+</span> Nova sala
+                    <span>+</span> Novo ambiente
                 </button>
             </div>
 
@@ -95,7 +110,7 @@
 
             <div class="modal-header">
                 <h5 class="modal-title" id="modalNovaSalaLabel">
-                    Cadastrar nova sala
+                    Cadastrar novo ambiente
                 </h5>
 
                 <button type="button"
@@ -110,7 +125,7 @@
                 <form id="formNovaSala">
 
                     <div class="mb-3">
-                        <label class="form-label">Nome da sala</label>
+                        <label class="form-label">Nome do ambiente</label>
 
                         <input type="text"
                                class="form-control"
@@ -242,7 +257,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/js/salas.js"></script>
+<script src="/js/api.js?v=1"></script>
+<script src="/js/notificacoes.js?v=1"></script>
+<script src="/js/salas.js?v=3"></script>
 
 </body>
 </html>

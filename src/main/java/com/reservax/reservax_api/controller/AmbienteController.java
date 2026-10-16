@@ -3,6 +3,7 @@ package com.reservax.reservax_api.controller;
 import com.reservax.reservax_api.model.Ambiente;
 import com.reservax.reservax_api.service.AmbienteService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,17 +31,20 @@ public class AmbienteController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public Ambiente salvar(@RequestBody Ambiente ambiente) {
         return ambienteService.salvar(ambiente);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Ambiente> atualizar(@PathVariable Long id, @RequestBody Ambiente ambiente) {
         Ambiente ambienteAtualizado = ambienteService.atualizar(id, ambiente);
         return ResponseEntity.ok(ambienteAtualizado);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
         ambienteService.excluir(id);
         return ResponseEntity.noContent().build();
